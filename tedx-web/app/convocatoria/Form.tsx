@@ -1,5 +1,7 @@
 "use client";
 import { FormEvent, useState } from "react";
+import { generateApplicantPDF } from "../../lib/pdfGenerator";
+import logoWhite from "../media/logo-white.png";
 
 export default function ConvocatoriaForm() {
   const [nombre, setNombre] = useState("");
@@ -25,6 +27,8 @@ export default function ConvocatoriaForm() {
   const [submitMessage, setSubmitMessage] = useState<string>("");
   const [submitError, setSubmitError] = useState<string>("");
   const [showConfirm, setShowConfirm] = useState(false);
+  const [submittedData, setSubmittedData] = useState<any>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   function toggleCategoria(value: string) {
     setCategorias(prev => (prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]));
@@ -44,7 +48,7 @@ export default function ConvocatoriaForm() {
     if (!telefono.trim()) newErrors.telefono = "El número telefónico es obligatorio.";
     else {
       const digits = telefono.replace(/\D/g, "");
-      if (digits.length < 7) newErrors.telefono = "Ingresa un número válido (mínimo 7 dígitos).";
+      if (digits.length < 8) newErrors.telefono = "Ingresa un número válido (mínimo 8 dígitos).";
     }
     if (!linkedin.trim()) newErrors.linkedin = "El perfil de LinkedIn es obligatorio.";
     if (!perfil.trim()) newErrors.perfil = "Selecciona tu perfil.";
@@ -93,10 +97,11 @@ export default function ConvocatoriaForm() {
       const firestoreModule = await import("firebase/firestore");
       const db = firebaseModule.getClientDb();
       const col = firestoreModule.collection(db, "ponentesTedx");
-      await firestoreModule.addDoc(col, {
+      const docRef = await firestoreModule.addDoc(col, {
         ...payload,
         createdAt: firestoreModule.serverTimestamp(),
       });
+      setSubmittedData({ ...payload, id: docRef.id });
 
       setSubmitMessage("Postulación guardada correctamente.");
 
@@ -296,7 +301,43 @@ export default function ConvocatoriaForm() {
       </div>
 
       {submitMessage && (
-        <p className="rounded-md border border-green-600/30 bg-green-50 px-3 py-2 text-sm text-green-700">{submitMessage}</p>
+        <div className="mt-6 p-6 bg-green-50 border border-green-200 rounded-xl text-center shadow-sm">
+          <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+             <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+          </div>
+          <h3 className="text-xl font-bold text-green-900 mb-2">{submitMessage}</h3>
+          <p className="text-sm text-green-700 mb-6">Tu postulación ha sido registrada. Puedes hacer seguimiento a través del código en tu PDF.</p>
+          
+          {submittedData && (
+            <button
+               type="button"
+               disabled={isGeneratingPDF}
+               onClick={async () => {
+                 setIsGeneratingPDF(true);
+                 try {
+                   await generateApplicantPDF(submittedData, logoWhite.src);
+                 } catch (e) {
+                   console.error("Error al generar PDF:", e);
+                   alert("Ocurrió un error al generar el PDF");
+                 }
+                 setIsGeneratingPDF(false);
+               }}
+               className="inline-flex items-center justify-center space-x-2 font-bold px-6 py-3 bg-[var(--color-ted-red)] text-white hover:bg-[#c00020] rounded-lg transition-colors shadow-md hover:shadow-lg disabled:opacity-50"
+            >
+               {isGeneratingPDF ? (
+                 <>
+                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                   <span>Generando PDF...</span>
+                 </>
+               ) : (
+                 <>
+                   <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                   <span>Descargar Comprobante PDF</span>
+                 </>
+               )}
+            </button>
+          )}
+        </div>
       )}
       {submitError && (
         <p className="rounded-md border border-red-600/30 bg-red-50 px-3 py-2 text-sm text-red-700">{submitError}</p>

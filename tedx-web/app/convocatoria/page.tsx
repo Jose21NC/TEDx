@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import logoBlack from "../media/logo-black.png";
-import ConvocatoriaForm from "./Form";
+
+const ConvocatoriaForm = dynamic(() => import("./Form"), { ssr: false });
 
 export default function ConvocatoriaPage() {
   return (

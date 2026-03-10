@@ -1,5 +1,7 @@
 "use client";
 import { FormEvent, useState } from "react";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { getClientDb } from "../../lib/firebaseClient";
 
 export default function ConvocatoriaForm() {
   const [nombre, setNombre] = useState("");
@@ -84,17 +86,12 @@ export default function ConvocatoriaForm() {
         confirmaPrivacidad,
       };
 
-      const response = await fetch("/api/postulaciones", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+      const db = getClientDb();
+      const col = collection(db, "ponentesTedx");
+      await addDoc(col, {
+        ...payload,
+        createdAt: serverTimestamp(),
       });
-
-      if (!response.ok) {
-        throw new Error("No se pudo guardar");
-      }
 
       setSubmitMessage("Postulación guardada correctamente.");
 

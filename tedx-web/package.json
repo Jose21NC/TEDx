@@ -5,10 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "export": "next build && next export",
     "start": "next start -p ${PORT:-3000}",
     "lint": "eslint"
   },
   "dependencies": {
+    "firebase": "^10.22.0",
     "firebase-admin": "^13.7.0",
     "next": "16.1.6",
     "react": "19.2.3",

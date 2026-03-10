@@ -119,7 +119,7 @@ export default function ConvocatoriaForm() {
   }
 
   return (
-    <form className="mt-4 space-y-6" onSubmit={handleSubmit}>
+    <form suppressHydrationWarning className="mt-4 space-y-6" onSubmit={handleSubmit}>
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">SECCIÓN 1: Datos Personales</h2>
 

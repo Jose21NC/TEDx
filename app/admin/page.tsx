@@ -9,6 +9,7 @@ import MobileNav from "../components/MobileNav";
 
 
 export default function AdminPage() {
+  const [mounted, setMounted] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPass, setLoginPass] = useState("");
@@ -28,6 +29,7 @@ export default function AdminPage() {
 
   // close menu on outside click
   useEffect(() => {
+    setMounted(true);
     function onDoc(e: MouseEvent) {
       if (!(e.target instanceof Node)) return;
       const target = e.target as Node;
@@ -164,6 +166,23 @@ export default function AdminPage() {
     }
   }
 
+  function ensureProtocol(url: string | null | undefined) {
+    if (!url) return "#";
+    url = url.trim();
+    if (!/^https?:\/\//i.test(url)) {
+      return `https://${url}`;
+    }
+    return url;
+  }
+
+  if (!mounted) {
+    return (
+      <main className="min-h-dvh flex items-center justify-center bg-gray-900 px-6">
+        <p className="text-gray-400 font-mono tracking-widest text-sm animate-pulse">CARGANDO...</p>
+      </main>
+    );
+  }
+
   if (!isLoggedIn) {
     return (
       <main className="min-h-dvh flex flex-col items-center justify-center bg-gray-900 px-6 font-sans selection:bg-[var(--color-ted-red)] selection:text-white">
@@ -188,6 +207,7 @@ export default function AdminPage() {
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Correo Electrónico</label>
               <input 
+                suppressHydrationWarning
                 type="email" 
                 value={loginEmail} 
                 onChange={e => setLoginEmail(e.target.value)} 
@@ -199,6 +219,7 @@ export default function AdminPage() {
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Contraseña</label>
               <input 
+                suppressHydrationWarning
                 type="password" 
                 value={loginPass} 
                 onChange={e => setLoginPass(e.target.value)} 
@@ -357,7 +378,7 @@ export default function AdminPage() {
                   <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between pt-2">
                     <div className="flex flex-wrap items-center gap-3 text-sm font-medium">
                       {p.linkedin && (
-                        <a href={p.linkedin} target="_blank" rel="noreferrer" className="bg-[#0077b5] text-white px-3 py-1.5 rounded text-xs hover:bg-[#005e93] transition flex items-center shadow-sm">
+                        <a href={ensureProtocol(p.linkedin)} target="_blank" rel="noreferrer" className="bg-[#0077b5] text-white px-3 py-1.5 rounded text-xs hover:bg-[#005e93] transition flex items-center shadow-sm">
                           LinkedIn ↗
                         </a>
                       )}
@@ -367,7 +388,7 @@ export default function AdminPage() {
                         </span>
                       )}
                       {p.videoLink && (
-                        <a href={p.videoLink} target="_blank" rel="noreferrer" className="bg-black text-[var(--color-ted-red)] px-4 py-1.5 rounded hover:bg-gray-900 transition flex items-center gap-2 font-bold text-xs uppercase tracking-wider shadow-sm border border-[var(--color-ted-red)]">
+                        <a href={ensureProtocol(p.videoLink)} target="_blank" rel="noreferrer" className="bg-black text-[var(--color-ted-red)] px-4 py-1.5 rounded hover:bg-gray-900 transition flex items-center gap-2 font-bold text-xs uppercase tracking-wider shadow-sm border border-[var(--color-ted-red)]">
                           ▶ Ver Pitch URL
                         </a>
                       )}

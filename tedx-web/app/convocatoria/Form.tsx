@@ -24,6 +24,7 @@ export default function ConvocatoriaForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitMessage, setSubmitMessage] = useState<string>("");
   const [submitError, setSubmitError] = useState<string>("");
+  const [showConfirm, setShowConfirm] = useState(false);
 
   function toggleCategoria(value: string) {
     setCategorias(prev => (prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]));
@@ -41,7 +42,10 @@ export default function ConvocatoriaForm() {
     if (!correo.trim()) newErrors.correo = "El correo es obligatorio.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim())) newErrors.correo = "Formato de correo inválido.";
     if (!telefono.trim()) newErrors.telefono = "El número telefónico es obligatorio.";
-    else if (!/^\d{4}-\d{4}$/.test(telefono.trim())) newErrors.telefono = "El número debe tener el formato 1234-5678.";
+    else {
+      const digits = telefono.replace(/\D/g, "");
+      if (digits.length < 7) newErrors.telefono = "Ingresa un número válido (mínimo 7 dígitos).";
+    }
     if (!linkedin.trim()) newErrors.linkedin = "El perfil de LinkedIn es obligatorio.";
     if (!perfil.trim()) newErrors.perfil = "Selecciona tu perfil.";
     if (perfil === "Otro" && !perfilOtro.trim()) newErrors.perfilOtro = "Por favor especifique su perfil.";
@@ -84,6 +88,7 @@ export default function ConvocatoriaForm() {
         confirmaPrivacidad,
       };
 
+      // submit payload to Firestore
       const firebaseModule = await import("../../lib/firebaseClient");
       const firestoreModule = await import("firebase/firestore");
       const db = firebaseModule.getClientDb();
@@ -118,8 +123,20 @@ export default function ConvocatoriaForm() {
     }
   }
 
+  function handleConfirmSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setShowConfirm(true);
+  }
+
+  async function confirmAndSend() {
+    setShowConfirm(false);
+    // programmatically trigger submit logic
+    const fakeEvent = { preventDefault() {} } as unknown as FormEvent;
+    await handleSubmit(fakeEvent);
+  }
+
   return (
-    <form suppressHydrationWarning className="mt-4 space-y-6" onSubmit={handleSubmit}>
+    <form suppressHydrationWarning className="mt-4 space-y-6" onSubmit={handleConfirmSubmit}>
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">SECCIÓN 1: Datos Personales</h2>
 
@@ -159,7 +176,7 @@ export default function ConvocatoriaForm() {
 
         <label className="block">
           <span className="text-sm font-medium">Enlace a redes sociales (Opcional)</span>
-          <input value={redes} onChange={e => setRedes(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" placeholder="Facebook / Instagram / TikTok - enlace" />
+          <textarea value={redes} onChange={e => setRedes(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" placeholder="Facebook / Instagram / TikTok - enlaces o descripción" rows={3} />
         </label>
 
         <label className="block">
@@ -283,6 +300,20 @@ export default function ConvocatoriaForm() {
       )}
       {submitError && (
         <p className="rounded-md border border-red-600/30 bg-red-50 px-3 py-2 text-sm text-red-700">{submitError}</p>
+      )}
+
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowConfirm(false)} />
+          <div className="relative w-full max-w-lg rounded-md bg-white p-6 shadow-lg">
+            <h3 className="mb-3 text-lg font-semibold">Confirmar envío</h3>
+            <p className="mb-4 text-sm text-gray-700">¿Estás seguro de que deseas enviar esta postulación? Revisa que tus datos sean correctos.</p>
+            <div className="flex justify-end gap-3">
+              <button className="rounded-md border px-4 py-2" onClick={() => setShowConfirm(false)}>Cancelar</button>
+              <button className="rounded-md bg-[var(--color-ted-red)] px-4 py-2 text-white" onClick={() => confirmAndSend()}>Confirmar y enviar</button>
+            </div>
+          </div>
+        </div>
       )}
     </form>
   );

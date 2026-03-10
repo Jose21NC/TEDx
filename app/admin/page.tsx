@@ -164,6 +164,60 @@ export default function AdminPage() {
     }
   }
 
+  if (!isLoggedIn) {
+    return (
+      <main className="min-h-dvh flex flex-col items-center justify-center bg-gray-900 px-6 font-sans selection:bg-[var(--color-ted-red)] selection:text-white">
+        <div className="w-full max-w-sm bg-black border border-gray-800 p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-[var(--color-ted-red)]"></div>
+          <div className="flex justify-center mb-8 mt-2">
+            <Image src={logoWhite} alt="TEDx" className="h-10 w-auto" />
+          </div>
+          <p className="text-gray-400 text-xs font-mono text-center mb-8 uppercase tracking-widest">Portal de Revisores</p>
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (loginEmail === process.env.NEXT_PUBLIC_EMAIL && loginPass === process.env.NEXT_PUBLIC_PASSWORD) {
+                setIsLoggedIn(true);
+                setLoginError("");
+              } else {
+                setLoginError("Credenciales incorrectas");
+              }
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Correo Electrónico</label>
+              <input 
+                type="email" 
+                value={loginEmail} 
+                onChange={e => setLoginEmail(e.target.value)} 
+                className="w-full bg-[#111] border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--color-ted-red)] transition-colors placeholder-gray-700 font-mono text-sm"
+                placeholder="admin@tedx.com"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Contraseña</label>
+              <input 
+                type="password" 
+                value={loginPass} 
+                onChange={e => setLoginPass(e.target.value)} 
+                className="w-full bg-[#111] border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--color-ted-red)] transition-colors placeholder-gray-700 font-mono text-sm"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            {loginError && <p className="text-[var(--color-ted-red)] text-sm font-semibold pt-1">{loginError}</p>}
+            <button type="submit" className="w-full bg-[var(--color-ted-red)] hover:bg-[#c00020] text-white font-bold py-3.5 rounded-lg transition-colors mt-6 uppercase tracking-wider text-sm shadow-lg shadow-red-900/20 hover:shadow-red-900/40">
+              Ingresar al Panel
+            </button>
+          </form>
+        </div>
+        <p className="mt-8 text-xs text-gray-600 font-mono">Evento Independiente operado bajo licencia TED</p>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-dvh flex flex-col bg-[#1a1a1a] text-white selection:bg-[var(--color-ted-red)] selection:text-white animate-page-fade">
       <header className="border-b border-black/5 bg-black text-[#222] sticky top-0 z-20 shadow-md">

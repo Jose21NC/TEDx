@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+:root {
+  --color-ted-red: #EB0028;
+  --color-ted-black: #000000;
+  --color-ted-dark-gray: #2B2B2B;
+}
+
+html,
+body {
+  background: #000000;
+  color: #1f1f1f;
+  min-height: 100%;
+  scroll-behavior: smooth;
+}
+
+/* Página: animación de entrada ligera al montar el componente */
+@keyframes page-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-page-fade {
+  animation: page-fade 420ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-fade { animation: none; }
+}
+
+/* Exit animation when navigating away */
+.page-exit {
+  animation: page-fade 160ms ease-in both;
+  opacity: 0 !important;
+  transform: translateY(6px) !important;
+}
+
+/* Custom cursor */
+.site-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--color-ted-red);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(1);
+  transition: transform 120ms ease, background-color 120ms ease, opacity 120ms ease;
+  z-index: 9999;
+  mix-blend-mode: normal;
+  background: transparent;
+}
+
+.site-cursor.cursor--hover {
+  transform: translate(-50%, -50%) scale(1.8);
+  background: rgba(235,0,40,0.08);
+}
+
+/* On large screens we keep native cursor visible and add a small dot + follower cursor */
+@media (pointer: fine) {
+  body { cursor: auto; }
+}
+
+/* Hide custom cursor on coarse pointer devices (touch) */
+@media (pointer: coarse), (hover: none) {
+  .site-cursor, .site-cursor-dot {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+/* small solid dot at pointer tip */
+.site-cursor-dot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-ted-red);
+  pointer-events: none;
+  z-index: 10001;
+  transform: translate(-50%, -50%);
+}
+
+.site-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--color-ted-red);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(1);
+  transition: transform 100ms ease, background-color 100ms ease, opacity 100ms ease;
+  z-index: 9999;
+  background: transparent;
+}
+
+.site-cursor.cursor--hover {
+  transform: translate(-50%, -50%) scale(1.9);
+  background: rgba(235,0,40,0.06);
+}
+
+.sponsors-mobile-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px;
+  height: 84px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sponsors-mobile-item { transition: none !important; }
+}

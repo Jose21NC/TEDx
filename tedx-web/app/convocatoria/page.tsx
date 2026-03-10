@@ -1,9 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import logoBlack from "../media/logo-black.png";
-
-const ConvocatoriaForm = dynamic(() => import("./Form"), { ssr: false });
+import ClientFormWrapper from "./ClientFormWrapper";
 
 export default function ConvocatoriaPage() {
   return (
@@ -77,7 +75,7 @@ export default function ConvocatoriaPage() {
               </div>
 
               <div className="flex-1">
-                <ConvocatoriaForm />
+                <ClientFormWrapper />
               </div>
             </div>
           </div>

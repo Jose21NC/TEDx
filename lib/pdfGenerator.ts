@@ -1,6 +1,7 @@
 import { pdf } from '@react-pdf/renderer';
 import QRCode from "qrcode";
 import { ApplicantPDF } from './ApplicantPDF';
+import { SponsorPDF } from './SponsorPDF';
 import { saveAs } from 'file-saver';
 
 export async function generateApplicantPDF(p: any, logoSrc: string) {
@@ -34,6 +35,30 @@ export async function generateApplicantPDF(p: any, logoSrc: string) {
     ).toBlob();
 
     const fileName = `TEDx_${(p.nombre || "Postulacion").replace(/\s+/g, '_')}_${p.id.substring(0,6)}.pdf`;
+    saveAs(blob, fileName);
+
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
+export async function generateSponsorPDF(sponsor: any, logoSrc: string) {
+  try {
+    const dateSource = sponsor.createdAt?.toDate ? sponsor.createdAt.toDate() : sponsor.createdAt?.seconds ? new Date(sponsor.createdAt.seconds * 1000) : new Date();
+    const dateStr = isNaN(dateSource.getTime()) ? "—" : dateSource.toLocaleDateString();
+
+    const blob = await pdf(
+      SponsorPDF({
+        sponsor,
+        dateStr,
+        logoSrc,
+      })
+    ).toBlob();
+
+    const baseName = (sponsor.companyName || "Sponsor").replace(/\s+/g, '_');
+    const fileName = `TEDx_Sponsor_${baseName}_${(sponsor.id || "sinid").substring(0, 6)}.pdf`;
     saveAs(blob, fileName);
 
     return true;

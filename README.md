@@ -1,6 +1,6 @@
 # TEDx Avenida Bolivar - Web
 
-Sitio en Next.js con formulario de convocatoria conectado a Firebase Firestore.
+Sitio en Next.js con formularios conectados a Firebase Firestore y correo transaccional para confirmaciones y newsletter.
 
 ## Desarrollo local
 
@@ -26,12 +26,41 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY----
 
 Nota: `FIREBASE_PRIVATE_KEY` debe conservar los `\n` escapados.
 
-## API de postulaciones
-
-- `POST /api/postulaciones`: guarda una postulación en Firestore (colección `postulaciones`).
-- `GET /api/postulaciones`: lista postulaciones.
-
 ## Despliegue en hosting
 
-En tu proveedor (Vercel, Railway, Render, etc.) agrega las mismas variables de entorno de Firebase.
-Sin esas variables, la API no podrá guardar ni leer postulaciones.
+En Hostinger solo sube el contenido exportado de `out/`.
+Los formularios de voluntariado y patrocinio siguen guardando en Firestore desde el navegador con el SDK cliente.
+Sin las variables de Firebase, esos guardados no funcionarán.
+
+## Correo y newsletter
+
+Agrega también estas variables en `.env.local` para activar los correos automáticos:
+
+```bash
+RESEND_API_KEY=tu_clave_de_resend
+RESEND_FROM_EMAIL=TEDx Avenida Bolivar <noreply@tu-dominio.com>
+MAILCHIMP_API_KEY=tu_clave_de_mailchimp
+MAILCHIMP_AUDIENCE_ID=tu_audience_id
+MAILCHIMP_SERVER_PREFIX=usXX
+NEXT_PUBLIC_NOTIFICATION_API_BASE_URL=https://us-central1-tu-proyecto.cloudfunctions.net
+```
+
+Las funciones disponibles son:
+
+- `POST /confirmacion`: envía un correo automático de confirmación al usuario.
+- `POST /newsletter`: suscribe el correo al newsletter de Mailchimp.
+
+## Despliegue
+
+El frontend está preparado para llamar a Firebase Functions directamente, así que en Hostinger solo necesitas servir los archivos estáticos.
+
+## Firebase Functions
+
+La carpeta `functions/` contiene el backend serverless para Resend y Mailchimp. Debes instalar dependencias y desplegarla con Firebase CLI.
+
+Pasos de despliegue:
+
+1. Entra a `functions/` y ejecuta `npm install`.
+2. Configura en Firebase los secretos `RESEND_API_KEY` y `MAILCHIMP_API_KEY`, y los valores `RESEND_FROM_EMAIL`, `MAILCHIMP_AUDIENCE_ID` y `MAILCHIMP_SERVER_PREFIX`.
+3. Despliega con `firebase deploy --only functions`.
+4. Copia la URL base de las funciones en `NEXT_PUBLIC_NOTIFICATION_API_BASE_URL` y vuelve a exportar el sitio estático.

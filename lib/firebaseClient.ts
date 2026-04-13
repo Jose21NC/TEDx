@@ -1,5 +1,6 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 function initFirebaseClient() {
   if (getApps().length > 0) return getApps()[0];
@@ -27,4 +28,9 @@ function initFirebaseClient() {
 export function getClientDb() {
   const app = initFirebaseClient();
   return getFirestore(app as any);
+}
+
+export function getClientStorage() {
+  const app = initFirebaseClient();
+  return getStorage(app as any);
 }

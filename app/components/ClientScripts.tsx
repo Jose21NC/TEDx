@@ -1,12 +1,18 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function ClientScripts() {
+  const router = useRouter();
+  const pathname = usePathname();
   const cursorRef = useRef<HTMLDivElement | null>(null);
   const dotRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const posRef = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
+
+  useEffect(() => {
+    document.documentElement.classList.remove("page-exit");
+  }, [pathname]);
 
   useEffect(() => {
     // only enable custom cursor on devices with fine pointer (mouse)
@@ -69,28 +75,39 @@ export default function ClientScripts() {
       const targetAttr = anchor.getAttribute("target");
       if (!href) return;
       // ignore external links and anchors with modifiers
-      if (href.startsWith("http") || href.startsWith("mailto:") || targetAttr === "_blank" || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (
+        href.startsWith("http") ||
+        href.startsWith("mailto:") ||
+        href.startsWith("#") ||
+        targetAttr === "_blank" ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.altKey
+      )
+        return;
 
       // internal link: animate out then navigate
       e.preventDefault();
       document.documentElement.classList.add("page-exit");
-      // shorter delay so navigation feels faster
-      setTimeout(() => {
-        window.location.href = href;
-      }, 120);
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          router.push(href);
+        });
+      });
     }
 
     function onOver(e: Event) {
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      const anchor = target.closest("a") as HTMLAnchorElement | null;
-      if (anchor) onEnterLink();
+      const interactive = target.closest("a,button,[role='button']") as HTMLElement | null;
+      if (interactive) onEnterLink();
     }
     function onOut(e: Event) {
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      const anchor = target.closest("a") as HTMLAnchorElement | null;
-      if (anchor) onLeaveLink();
+      const interactive = target.closest("a,button,[role='button']") as HTMLElement | null;
+      if (interactive) onLeaveLink();
     }
 
     document.addEventListener("mousemove", onMove);

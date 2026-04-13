@@ -122,7 +122,7 @@ export default function ApplicationStatusPage() {
       <header className="border-b border-gray-200 bg-white sticky top-0 z-20 shadow-sm">
         <nav className="relative mx-auto flex w-full max-w-[88rem] items-center justify-between px-6 py-0.5">
           <Link href="/" className="flex items-center">
-            <Image src={logoBlack} alt="TEDx Avenida Bolivar" className="h-[4.5rem] w-auto" priority />
+            <Image src={logoBlack} alt="TEDx Avenida Bolivar" className="h-[4.5rem] w-auto" />
           </Link>
           <MobileNav />
         </nav>

@@ -13,7 +13,7 @@ export default function ConvocatoriaPage() {
             <div className="w-full rounded-md md:rounded-l-md md:rounded-r-none bg-black p-4 md:p-10 text-white flex flex-col">
               <div className="flex-1 flex flex-col gap-6">
                 <div className="w-full">
-                  <img src="/media/SPEAKERS-logo.png" alt="SPEAKERS logo" className="w-80 mx-auto h-auto" />
+                  <img src="/media/SPEAKERS-logo.webp" alt="SPEAKERS logo" className="w-80 mx-auto h-auto" />
                 </div>
 
                 <div className="prose prose-invert max-w-none text-sm leading-7 text-justify">
@@ -34,8 +34,8 @@ export default function ConvocatoriaPage() {
                   <h3 className="mt-4 text-base font-semibold text-[var(--color-ted-red)]">FECHAS CLAVE</h3>
                   <ul className="list-disc ml-6">
                     <li>Apertura de convocatoria: Martes 10 de marzo de 2026</li>
-                    <li>Fecha máxima de postulación: Viernes 10 de abril de 2026</li>
-                    <li>Audición Presencial (Open Mic): Sábado 18 de abril de 2026</li>
+                    <li>Fecha máxima de postulación: Lunes 25 de Mayo de 2026</li>
+                    <li>Audición Presencial (Open Mic): Fecha por definir</li>
                   </ul>
 
                   <h3 className="mt-4 text-base font-semibold text-[var(--color-ted-red)]">BASES DE LA POSTULACIÓN</h3>
@@ -54,7 +54,7 @@ export default function ConvocatoriaPage() {
 
                   <h3 className="mt-4 text-base font-semibold text-[var(--color-ted-red)]">EL PROCESO DE SELECCIÓN</h3>
                   <ul className="list-disc ml-6">
-                    <li>Si tu idea queda preseleccionada, te contactaremos por correo electrónico para invitarte al OPEN MIC presencial que se llevará a cabo el sábado 18 de abril en Managua. No se admitirán presentaciones de manera remota.</li>
+                    <li>Si tu idea queda preseleccionada, te contactaremos por correo electrónico para invitarte al OPEN MIC presencial que se llevará a cabo en Managua. No se admitirán presentaciones de manera remota.</li>
                     <li>En el Open Mic, tendrás exactamente 3 minutos para presentar tu idea en vivo frente a nuestro equipo curador.</li>
                     <li>De este grupo, seleccionaremos a los speakers oficiales que se subirán al escenario de TEDxAvenida Bolivar.</li>
                   </ul>

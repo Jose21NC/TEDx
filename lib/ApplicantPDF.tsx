@@ -15,33 +15,30 @@ export const ApplicantPDF = ({ p, logoSrc, qrDataUrl, dateStr }: ApplicantPDFPro
   const perfilText = p.perfil === "Otro" ? `${p.perfil} - ${p.perfilOtro || ''}` : p.perfil;
   const cats = p.categorias ? (Array.isArray(p.categorias) ? p.categorias.join(' / ') : p.categorias) : '—';
 
-  // Margen de seguridad para el QR (para que el texto no quede detrás)
-  const qrSafeStyle = { marginRight: 90 };
-
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      <Page size="LETTER" style={styles.page}>
         
         {/* 1 y 2. HEADER FIJO */}
-        <View style={styles.headerBlack} fixed>
-          {logoSrc ? (
-            <Image src={logoSrc} style={styles.logo} />
-          ) : (
-            <Text style={styles.logoFallback}>TEDx Avenida Bolivar</Text>
+        <View style={styles.headerTop} fixed>
+          <View>
+            {logoSrc ? (
+              <Image src={logoSrc} style={styles.logo} />
+            ) : (
+              <Text style={styles.logoFallback}>TEDx Avenida Bolivar</Text>
+            )}
+          </View>
+          
+          {qrDataUrl && (
+            <View style={styles.qrWrapper}>
+              <Image src={qrDataUrl} style={styles.qrImage} />
+            </View>
           )}
         </View>
         <View style={styles.headerRed} fixed />
 
         {/* CONTENIDO PRINCIPAL */}
         <View style={styles.body}>
-          
-          {/* --- ESPACIADOR DINÁMICO PARA PÁGINAS 2+ --- */}
-          <View 
-            fixed 
-            render={({ pageNumber }) => (
-              pageNumber > 1 ? <View style={{ height: 60, width: '100%' }} /> : null
-            )} 
-          />
 
           {/* 5. TÍTULO Y ESTADO */}
           <Text style={styles.mainTitle}>EXPEDIENTE DE POSTULACIÓN</Text>
@@ -57,30 +54,30 @@ export const ApplicantPDF = ({ p, logoSrc, qrDataUrl, dateStr }: ApplicantPDFPro
 
           <View style={styles.gridRow}>
             <View style={styles.gridCol}>
-              <Text style={styles.gridText}>Correo: {p.correo || '—'}</Text>
+              <Text style={styles.gridText}><Text style={styles.gridLabel}>Correo:</Text> {p.correo || '—'}</Text>
             </View>
             <View style={styles.gridCol}>
-              <Text style={styles.gridText}>Teléfono: {p.telefono || '—'}</Text>
+              <Text style={styles.gridText}><Text style={styles.gridLabel}>Teléfono:</Text> {p.telefono || '—'}</Text>
             </View>
           </View>
 
           <View style={styles.gridRow}>
             <View style={styles.gridCol}>
-              <Text style={styles.gridText}>Edad: {p.edad || '—'} años</Text>
+              <Text style={styles.gridText}><Text style={styles.gridLabel}>Edad:</Text> {p.edad || '—'} años</Text>
             </View>
             <View style={styles.gridCol}>
-              <Text style={styles.gridText}>Perfil: {perfilText || '—'}</Text>
+              <Text style={styles.gridText}><Text style={styles.gridLabel}>Perfil:</Text> {perfilText || '—'}</Text>
             </View>
           </View>
 
           {p.linkedin && (
             <View style={styles.gridRow}>
-              <Text style={styles.gridText}>LinkedIn: {p.linkedin}</Text>
+              <Text style={styles.gridText}><Text style={styles.gridLabel}>LinkedIn:</Text> {p.linkedin}</Text>
             </View>
           )}
           {p.redes && (
             <View style={styles.gridRow}>
-              <Text style={styles.gridText}>Redes: {p.redes}</Text>
+              <Text style={styles.gridText}><Text style={styles.gridLabel}>Redes:</Text> {p.redes}</Text>
             </View>
           )}
 
@@ -93,35 +90,26 @@ export const ApplicantPDF = ({ p, logoSrc, qrDataUrl, dateStr }: ApplicantPDFPro
           <Text style={styles.categoriesText}>Categorías de interés: {cats}</Text>
 
           {/* BLOQUE: IDEA CENTRAL */}
-          <View style={[styles.blockContainer, qrSafeStyle]} wrap={false}>
+          <View style={styles.blockContainer}>
             <Text style={styles.blockTitle}>Idea Central:</Text>
-            <Text style={styles.blockText}>{p.idea || '—'}</Text>
+            <Text style={[styles.blockText, { textAlign: 'justify' }]}>{p.idea || '—'}</Text>
           </View>
 
           {/* BLOQUE: NOVEDAD */}
-          <View style={[styles.blockContainer, qrSafeStyle]} wrap={false}>
+          <View style={styles.blockContainer}>
             <Text style={styles.blockTitle}>Por qué es importante o novedoso:</Text>
-            <Text style={styles.blockText}>{p.novedad || '—'}</Text>
+            <Text style={[styles.blockText, { textAlign: 'justify' }]}>{p.novedad || '—'}</Text>
           </View>
 
           {/* BLOQUE: POR QUÉ */}
           {p.porQue && (
-            <View style={[styles.blockContainer, qrSafeStyle]} wrap={false}>
+            <View style={styles.blockContainer}>
               <Text style={styles.blockTitle}>Por qué quiero dar esta charla:</Text>
-              <Text style={styles.blockText}>{p.porQue}</Text>
+              <Text style={[styles.blockText, { textAlign: 'justify' }]}>{p.porQue}</Text>
             </View>
           )}
 
         </View>
-
-        {/* 4. CÓDIGO QR FIJO */}
-        {qrDataUrl && (
-          <View style={styles.qrWrapper} fixed>
-            <Image src={qrDataUrl} style={styles.qrImage} />
-            <Text style={styles.qrLabel1}>ESCANEA PARA</Text>
-            <Text style={styles.qrLabel2}>VER ESTADO</Text>
-          </View>
-        )}
 
         {/* 8. PIE DE PÁGINA FIJO */}
         <View style={styles.footer} fixed>

@@ -1,7 +1,8 @@
 "use client";
 import { FormEvent, useState } from "react";
 import { generateApplicantPDF } from "../../lib/pdfGenerator";
-import logoWhite from "../media/logo-white.png";
+import logoBlack from "../media/logo-black.png";
+import { sendConfirmationEmail } from "../../lib/notifications";
 
 export default function ConvocatoriaForm() {
   const [nombre, setNombre] = useState("");
@@ -21,6 +22,9 @@ export default function ConvocatoriaForm() {
   const [novedad, setNovedad] = useState("");
 
   const [videoLink, setVideoLink] = useState("");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
   const [confirmaReglas, setConfirmaReglas] = useState(false);
   const [confirmaPrivacidad, setConfirmaPrivacidad] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -61,7 +65,8 @@ export default function ConvocatoriaForm() {
     else if (porQue.trim().split(/\s+/).length > 100) newErrors.porQue = "Máximo 100 palabras.";
     if (!novedad.trim()) newErrors.novedad = "Este campo es obligatorio.";
     else if (novedad.trim().split(/\s+/).length > 100) newErrors.novedad = "Máximo 100 palabras.";
-    if (!videoLink.trim()) newErrors.videoLink = "El enlace al Video Pitch es obligatorio.";
+    if (!videoLink.trim() && !videoFile) newErrors.videoInfo = "Debes proporcionar un enlace o subir un video.";
+    else if (videoFile && videoFile.size > 150 * 1024 * 1024) newErrors.videoFile = "El video no debe superar 150MB.";
     if (!confirmaReglas) newErrors.confirmaReglas = "Debes confirmar el cumplimiento de las reglas TEDx.";
     if (!confirmaPrivacidad) newErrors.confirmaPrivacidad = "Debes aceptar el Aviso de Privacidad.";
 
@@ -71,6 +76,35 @@ export default function ConvocatoriaForm() {
     }
 
     try {
+      setIsUploading(true);
+      setUploadProgress(0);
+
+      const firebaseModule = await import("../../lib/firebaseClient");
+      const firestoreModule = await import("firebase/firestore");
+      
+      let finalVideoLink = videoLink.trim();
+
+      if (videoFile) {
+        const storageModule = await import("firebase/storage");
+        const storage = firebaseModule.getClientStorage();
+        const storageRef = storageModule.ref(storage, `videos_pitch/${Date.now()}_${videoFile.name}`);
+        const uploadTask = storageModule.uploadBytesResumable(storageRef, videoFile);
+
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadProgress(progress);
+          },
+          (error) => {
+            console.error("Storage upload error:", error);
+          }
+        );
+
+        await uploadTask;
+        finalVideoLink = await storageModule.getDownloadURL(storageRef);
+      }
+
       const payload = {
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
@@ -87,14 +121,12 @@ export default function ConvocatoriaForm() {
         idea: idea.trim(),
         porQue: porQue.trim(),
         novedad: novedad.trim(),
-        videoLink: videoLink.trim(),
+        videoLink: finalVideoLink,
         confirmaReglas,
         confirmaPrivacidad,
       };
 
       // submit payload to Firestore
-      const firebaseModule = await import("../../lib/firebaseClient");
-      const firestoreModule = await import("firebase/firestore");
       const db = firebaseModule.getClientDb();
       const col = firestoreModule.collection(db, "ponentesTedx");
       const docRef = await firestoreModule.addDoc(col, {
@@ -102,6 +134,16 @@ export default function ConvocatoriaForm() {
         createdAt: firestoreModule.serverTimestamp(),
       });
       setSubmittedData({ ...payload, id: docRef.id });
+
+      try {
+        await sendConfirmationEmail({
+          recipientEmail: payload.correo,
+          recipientName: payload.nombre,
+          source: "speakers",
+        });
+      } catch (error) {
+        console.error("Error sending speaker confirmation email:", error);
+      }
 
       setSubmitMessage("Postulación guardada correctamente.");
 
@@ -120,11 +162,15 @@ export default function ConvocatoriaForm() {
       setPorQue("");
       setNovedad("");
       setVideoLink("");
+      setVideoFile(null);
       setConfirmaReglas(false);
       setConfirmaPrivacidad(false);
       setErrors({});
-    } catch {
+    } catch (error: any) {
+      console.error("Error submitting document: ", error);
       setSubmitError("No se pudo enviar la postulación al servidor. Intenta nuevamente.");
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -141,7 +187,47 @@ export default function ConvocatoriaForm() {
   }
 
   return (
-    <form suppressHydrationWarning className="mt-4 space-y-6" onSubmit={handleConfirmSubmit}>
+    <div suppressHydrationWarning>
+      {submitMessage ? (
+        <div className="mt-6 p-6 bg-green-50 border border-green-200 rounded-xl text-center shadow-sm">
+          <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+             <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+          </div>
+          <h3 className="text-xl font-bold text-green-900 mb-2">{submitMessage}</h3>
+          <p className="text-sm text-green-700 mb-6">Tu postulación ha sido registrada. Puedes hacer seguimiento a través del código en tu PDF.</p>
+          
+          {submittedData && (
+            <button
+               type="button"
+               disabled={isGeneratingPDF}
+               onClick={async () => {
+                 setIsGeneratingPDF(true);
+                 try {
+                   await generateApplicantPDF(submittedData, logoBlack.src);
+                 } catch (e) {
+                   console.error("Error al generar PDF:", e);
+                   alert("Ocurrió un error al generar el PDF");
+                 }
+                 setIsGeneratingPDF(false);
+               }}
+               className="inline-flex items-center justify-center space-x-2 font-bold px-6 py-3 bg-[var(--color-ted-red)] text-white hover:bg-[#c00020] rounded-lg transition-colors shadow-md hover:shadow-lg disabled:opacity-50"
+            >
+               {isGeneratingPDF ? (
+                 <>
+                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                   <span>Generando PDF...</span>
+                 </>
+               ) : (
+                 <>
+                   <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                   <span>Descargar Comprobante PDF</span>
+                 </>
+               )}
+            </button>
+          )}
+        </div>
+      ) : (
+    <form className="mt-4 space-y-6" onSubmit={handleConfirmSubmit}>
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">SECCIÓN 1: Datos Personales</h2>
 
@@ -273,11 +359,48 @@ export default function ConvocatoriaForm() {
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">SECCIÓN 3: El Video Pitch</h2>
 
-        <label className="block">
-          <span className="text-sm font-medium">Enlace a tu Video Pitch *</span>
-          <input value={videoLink} onChange={e => setVideoLink(e.target.value)} className={`mt-1 block w-full rounded-md px-3 py-2 ${errors.videoLink ? 'border-red-600 border' : 'border border-gray-300'}`} placeholder="https://youtube.com/...." />
-          {errors.videoLink && <p className="mt-1 text-sm text-red-600">{errors.videoLink}</p>}
-        </label>
+        <div className="space-y-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <p className="text-sm text-gray-700 font-medium">Proporciona un enlace a tu Video Pitch O sube el archivo directamente (elige solo una opción):</p>
+          
+          <label className="block">
+            <span className="text-sm font-semibold">Opción 1: Enlace a tu Video Pitch (YouTube, Drive, etc.)</span>
+            <input value={videoLink} onChange={e => setVideoLink(e.target.value)} disabled={!!videoFile} className={`mt-1 block w-full rounded-md px-3 py-2 disabled:bg-gray-100 disabled:text-gray-400 ${errors.videoInfo ? 'border-red-600 border' : 'border border-gray-300'}`} placeholder="https://youtube.com/...." />
+          </label>
+
+          <div className="flex items-center text-gray-400">
+            <div className="flex-grow border-t border-gray-300"></div>
+            <span className="px-3 text-xs font-bold uppercase">O</span>
+            <div className="flex-grow border-t border-gray-300"></div>
+          </div>
+
+          <label className="block">
+            <span className="text-sm font-semibold">Opción 2: Sube tu Video Pitch (Máx 150MB)</span>
+            <input type="file" accept="video/*" disabled={!!videoLink} onChange={e => {
+              if (e.target.files && e.target.files[0]) {
+                setVideoFile(e.target.files[0]);
+              } else {
+                setVideoFile(null);
+              }
+            }} className={`mt-1 block w-full text-sm text-gray-500 disabled:opacity-50
+            file:mr-4 file:py-2 file:px-4
+            file:rounded-md file:border-0
+            file:text-sm file:font-semibold
+            file:bg-black file:text-white
+            hover:file:bg-red-600 file:disabled:bg-gray-400
+            ${(errors.videoFile || errors.videoInfo) ? 'border-red-600 border' : 'border border-gray-300'} rounded-md`} />
+            {errors.videoFile && <p className="mt-1 text-sm text-red-600">{errors.videoFile}</p>}
+            {isUploading && (
+               <div className="mt-2 text-sm text-blue-600 font-medium font-sans">
+                 Subiendo video... {Math.round(uploadProgress)}%
+                 <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                   <div className="bg-red-600 h-2.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
+                 </div>
+               </div>
+            )}
+          </label>
+          
+          {errors.videoInfo && <p className="text-sm text-red-600 font-medium">{errors.videoInfo}</p>}
+        </div>
 
         <label className="inline-flex items-start gap-2">
           <input type="checkbox" checked={confirmaReglas} onChange={e => setConfirmaReglas(e.target.checked)} className="mt-1" />
@@ -295,50 +418,11 @@ export default function ConvocatoriaForm() {
       </div>
 
       <div className="mt-4 flex justify-end">
-        <button type="submit" className="rounded-md bg-[var(--color-ted-red)] px-4 py-2 text-white font-semibold">
-          Enviar
+        <button type="submit" disabled={isUploading} className="rounded-md bg-[var(--color-ted-red)] px-4 py-2 text-white font-semibold disabled:opacity-50">
+          {isUploading ? "Enviando..." : "Enviar"}
         </button>
       </div>
 
-      {submitMessage && (
-        <div className="mt-6 p-6 bg-green-50 border border-green-200 rounded-xl text-center shadow-sm">
-          <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-             <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-          </div>
-          <h3 className="text-xl font-bold text-green-900 mb-2">{submitMessage}</h3>
-          <p className="text-sm text-green-700 mb-6">Tu postulación ha sido registrada. Puedes hacer seguimiento a través del código en tu PDF.</p>
-          
-          {submittedData && (
-            <button
-               type="button"
-               disabled={isGeneratingPDF}
-               onClick={async () => {
-                 setIsGeneratingPDF(true);
-                 try {
-                   await generateApplicantPDF(submittedData, logoWhite.src);
-                 } catch (e) {
-                   console.error("Error al generar PDF:", e);
-                   alert("Ocurrió un error al generar el PDF");
-                 }
-                 setIsGeneratingPDF(false);
-               }}
-               className="inline-flex items-center justify-center space-x-2 font-bold px-6 py-3 bg-[var(--color-ted-red)] text-white hover:bg-[#c00020] rounded-lg transition-colors shadow-md hover:shadow-lg disabled:opacity-50"
-            >
-               {isGeneratingPDF ? (
-                 <>
-                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                   <span>Generando PDF...</span>
-                 </>
-               ) : (
-                 <>
-                   <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                   <span>Descargar Comprobante PDF</span>
-                 </>
-               )}
-            </button>
-          )}
-        </div>
-      )}
       {submitError && (
         <p className="rounded-md border border-red-600/30 bg-red-50 px-3 py-2 text-sm text-red-700">{submitError}</p>
       )}
@@ -350,12 +434,14 @@ export default function ConvocatoriaForm() {
             <h3 className="mb-3 text-lg font-semibold">Confirmar envío</h3>
             <p className="mb-4 text-sm text-gray-700">¿Estás seguro de que deseas enviar esta postulación? Revisa que tus datos sean correctos.</p>
             <div className="flex justify-end gap-3">
-              <button className="rounded-md border px-4 py-2" onClick={() => setShowConfirm(false)}>Cancelar</button>
-              <button className="rounded-md bg-[var(--color-ted-red)] px-4 py-2 text-white" onClick={() => confirmAndSend()}>Confirmar y enviar</button>
+              <button disabled={isUploading} className="rounded-md border px-4 py-2 disabled:opacity-50" onClick={() => setShowConfirm(false)}>Cancelar</button>
+              <button disabled={isUploading} className="rounded-md bg-[var(--color-ted-red)] px-4 py-2 text-white disabled:opacity-50" onClick={() => confirmAndSend()}>{isUploading ? "Enviando..." : "Confirmar y enviar"}</button>
             </div>
           </div>
         </div>
       )}
     </form>
+    )}
+    </div>
   );
 }

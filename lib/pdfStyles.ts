@@ -4,19 +4,24 @@ export const styles = StyleSheet.create({
   page: {
     backgroundColor: '#FFFFFF',
     fontFamily: 'Helvetica',
-    paddingBottom: 85, // Espacio reservado para el footer (aprox 30mm)
+    paddingBottom: 70,
   },
   
   // 1 & 2. HEADER
-  headerBlack: {
-    backgroundColor: '#000000',
-    height: 113, // 40mm
-    justifyContent: 'center',
-    paddingLeft: 42, // 15mm
+  headerTop: {
+    backgroundColor: '#FCFCFC',
+    height: 94,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 42,
+    gap: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EDEDED',
   },
   headerRed: {
     backgroundColor: '#EB0028',
-    height: 8.5, // 3mm
+    height: 7,
   },
   
   // 3. LOGO
@@ -28,12 +33,12 @@ export const styles = StyleSheet.create({
   logoFallback: {
     fontFamily: 'Helvetica-Bold',
     fontSize: 20,
-    color: '#FFFFFF',
+    color: '#000000',
   },
 
   // CONTENEDOR PRINCIPAL
   body: {
-    paddingTop: 42,
+    paddingTop: 24,
     paddingHorizontal: 42,
   },
 
@@ -42,7 +47,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'Helvetica-Bold',
     fontSize: 22,
     color: '#000000',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   statusRow: {
     flexDirection: 'row',
@@ -57,7 +62,7 @@ export const styles = StyleSheet.create({
   divider: {
     borderBottomWidth: 1,
     borderBottomColor: '#E6E6E6',
-    marginBottom: 14,
+    marginBottom: 10,
   },
 
   // 6. DATOS DEL POSTULANTE
@@ -65,19 +70,19 @@ export const styles = StyleSheet.create({
     fontFamily: 'Helvetica-Bold',
     fontSize: 11,
     color: '#EB0028',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   applicantName: {
     fontFamily: 'Helvetica-Bold',
     fontSize: 16,
     color: '#000000',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   
   // Grid layout (Correo/Teléfono/Edad/Perfil)
   gridRow: {
     flexDirection: 'row',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   gridCol: {
     width: '50%',
@@ -92,8 +97,8 @@ export const styles = StyleSheet.create({
   dividerLight: {
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0', // rgb(240,240,240)
-    marginTop: 10,
-    marginBottom: 14,
+    marginTop: 8,
+    marginBottom: 10,
   },
 
   // 7. PROPUESTA DE LA CHARLA
@@ -101,15 +106,15 @@ export const styles = StyleSheet.create({
     fontFamily: 'Helvetica-Bold',
     fontSize: 16,
     color: '#000000',
-    marginBottom: 16,
+    marginBottom: 10,
   },
   categoriesText: {
     fontFamily: 'Helvetica',
     fontSize: 11,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   blockContainer: {
-    marginBottom: 14,
+    marginBottom: 10,
   },
   headerSpacer: {
     height: 60,
@@ -128,37 +133,29 @@ export const styles = StyleSheet.create({
 
   // 4. QR CODE (Posición absoluta solo en la primera página)
   qrWrapper: {
-    position: 'absolute',
-    bottom: 80,
-    right: 42,
     backgroundColor: '#FFFFFF',
     borderRadius: 4,
-    padding: 3,
+    padding: 2,
     alignItems: 'center',
-    width: 85,
-    height: 100,
+    justifyContent: 'center',
+    width: 58,
+    height: 58,
+    borderWidth: 1,
+    borderColor: '#E7E7E7',
   },
   qrImage: {
-    width: 79,
-    height: 95,
+    width: 54,
+    height: 54,
   },
-  qrLabel1: {
+
+  gridLabel: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 7,
-    color: '#646464', // rgb(100,100,100)
-    marginTop: -2,
-  },
-  qrLabel2: {
-    fontFamily: 'Helvetica-Bold',
-    fontSize: 7,
-    color: '#646464',
-    marginTop: 1,
   },
 
   // 8. PIE DE PÁGINA (Fixed across pages)
   footer: {
     position: 'absolute',
-    bottom: 20, // Y:290 aprox
+    bottom: 16,
     left: 42, // X:15
     right: 42,
     flexDirection: 'row',

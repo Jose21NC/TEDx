@@ -72,13 +72,13 @@ export default function PatrociniosPage() {
 
         <h2 className="mt-12 text-center text-2xl font-semibold tracking-tight md:text-3xl">Con el apoyo de</h2>
         <div className="mt-10 flex flex-col items-center gap-8">
-          <div className="flex flex-wrap items-center justify-center gap-8">
-            <div className="flex w-[220px] justify-center px-4">
-              <Image src={logoBoreal} alt="Boreal" className="h-20 w-auto object-contain" />
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8">
+            <div className="relative h-16 w-[180px] px-4 sm:h-20 sm:w-[220px]">
+              <Image src={logoBoreal} alt="Boreal" fill sizes="(max-width: 640px) 180px, 220px" className="object-contain" />
             </div>
 
-            <div className="flex w-[220px] justify-center px-4">
-              <Image src="/patrocinadores/redJovenes.png" alt="Red de Comunicadores" width={220} height={80} className="h-20 w-auto object-contain" style={{ height: "auto" }} />
+            <div className="relative h-16 w-[180px] px-4 sm:h-20 sm:w-[220px]">
+              <Image src="/patrocinadores/redJovenes.png" alt="Red de Comunicadores" fill sizes="(max-width: 640px) 180px, 220px" className="object-contain" />
             </div>
 
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 
 type SponsorsMobileCarouselProps = {
   files: string[];
@@ -25,16 +26,19 @@ export default function SponsorsMobileCarousel({ files }: SponsorsMobileCarousel
   }
 
   return (
-    <div className="relative h-24 w-full select-none overflow-hidden" aria-label="Carrusel automático de patrocinadores" role="region">
-      {normalizedFiles.map((file, fileIndex) => (
-        <div
-          key={file}
-          className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ease-in-out ${fileIndex === index ? "opacity-100 scale-100" : "opacity-0 scale-[0.985]"}`}
-          aria-hidden={fileIndex !== index}
-        >
-          <img src={`/patrocinadores/${file}`} alt={file} className="max-h-20 w-auto object-contain" draggable={false} />
-        </div>
-      ))}
+    <div className="mx-auto flex h-20 w-full max-w-[220px] select-none items-center justify-center overflow-hidden" aria-label="Carrusel automático de patrocinadores" role="region">
+      <div className="relative h-16 w-[180px] sm:h-20 sm:w-[220px]">
+        <Image
+          key={normalizedFiles[index]}
+          src={`/patrocinadores/${normalizedFiles[index]}`}
+          alt={normalizedFiles[index]}
+          fill
+          sizes="(max-width: 640px) 180px, 220px"
+          className="object-contain"
+          draggable={false}
+          priority={index === 0}
+        />
+      </div>
     </div>
   );
 }

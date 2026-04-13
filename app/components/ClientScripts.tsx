@@ -15,38 +15,53 @@ export default function ClientScripts() {
   }, [pathname]);
 
   useEffect(() => {
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const saveData =
+      typeof navigator !== "undefined" &&
+      "connection" in navigator &&
+      Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
+    const shouldUseTransitions = !reduceMotion && !saveData;
+
     // only enable custom cursor on devices with fine pointer (mouse)
     if (typeof window !== "undefined") {
       const canUseCursor = window.matchMedia && window.matchMedia("(pointer: fine) and (hover: hover)").matches;
-      if (!canUseCursor) return;
+      if (!canUseCursor || !shouldUseTransitions) return;
     }
 
-    // create follower cursor and small dot at pointer
-    const follower = document.createElement("div");
-    follower.className = "site-cursor";
-    document.body.appendChild(follower);
-    cursorRef.current = follower;
+    let idleCallbackId: number | null = null;
+    let idleTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
-    const dot = document.createElement("div");
-    dot.className = "site-cursor-dot";
-    document.body.appendChild(dot);
-    dotRef.current = dot;
+    function setupCursor() {
+      // create follower cursor and small dot at pointer
+      const follower = document.createElement("div");
+      follower.className = "site-cursor";
+      document.body.appendChild(follower);
+      cursorRef.current = follower;
 
-    function update() {
-      const cur = cursorRef.current;
-      const d = dotRef.current;
-      if (!cur || !d) return;
-      // faster easing for a more responsive follower cursor
-      posRef.current.tx += (posRef.current.x - posRef.current.tx) * 0.45;
-      posRef.current.ty += (posRef.current.y - posRef.current.ty) * 0.45;
-      // position the follower with smoothing
-      cur.style.transform = `translate(${posRef.current.tx}px, ${posRef.current.ty}px) translate(-50%, -50%) scale(1)`;
-      // dot is moved directly in onMove for immediate response
+      const dot = document.createElement("div");
+      dot.className = "site-cursor-dot";
+      document.body.appendChild(dot);
+      dotRef.current = dot;
+
+      function update() {
+        const cur = cursorRef.current;
+        const d = dotRef.current;
+        if (!cur || !d) return;
+        // faster easing for a more responsive follower cursor
+        posRef.current.tx += (posRef.current.x - posRef.current.tx) * 0.45;
+        posRef.current.ty += (posRef.current.y - posRef.current.ty) * 0.45;
+        // position the follower with smoothing
+        cur.style.transform = `translate(${posRef.current.tx}px, ${posRef.current.ty}px) translate(-50%, -50%) scale(1)`;
+        // dot is moved directly in onMove for immediate response
+        rafRef.current = requestAnimationFrame(update);
+      }
       rafRef.current = requestAnimationFrame(update);
     }
-    rafRef.current = requestAnimationFrame(update);
 
-    function onMove(e: MouseEvent) {
+    function onMove(e: PointerEvent) {
       posRef.current.x = e.clientX;
       posRef.current.y = e.clientY;
       // move dot directly for immediate feedback
@@ -89,7 +104,9 @@ export default function ClientScripts() {
 
       // internal link: animate out then navigate
       e.preventDefault();
-      document.documentElement.classList.add("page-exit");
+      if (shouldUseTransitions) {
+        document.documentElement.classList.add("page-exit");
+      }
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
           router.push(href);
@@ -110,14 +127,26 @@ export default function ClientScripts() {
       if (interactive) onLeaveLink();
     }
 
-    document.addEventListener("mousemove", onMove);
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      idleCallbackId = window.requestIdleCallback(setupCursor, { timeout: 400 });
+    } else {
+      idleTimeoutId = setTimeout(setupCursor, 1);
+    }
+
+    document.addEventListener("pointermove", onMove, { passive: true });
     document.addEventListener("click", onClick);
-    document.addEventListener("mouseover", onOver);
-    document.addEventListener("mouseout", onOut);
+    document.addEventListener("mouseover", onOver, { passive: true });
+    document.addEventListener("mouseout", onOut, { passive: true });
 
     return () => {
+      if (idleCallbackId !== null && typeof window !== "undefined" && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleCallbackId);
+      }
+      if (idleTimeoutId !== null) {
+        clearTimeout(idleTimeoutId);
+      }
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("pointermove", onMove);
       document.removeEventListener("click", onClick);
       document.removeEventListener("mouseover", onOver);
       document.removeEventListener("mouseout", onOut);

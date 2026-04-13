@@ -59,7 +59,7 @@ export default function SponsorsCtaSection() {
             <h3 className="max-w-[16ch] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">
               Tienes una idea que merece ser difundida y quieres ser speaker?
             </h3>
-            <Link href="/convocatoria" className="group tedx-cta-link mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.14em] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
+            <Link href="/convocatoria" className="group tedx-cta-link mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.14em] text-white md:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:focus-visible:ring-black/70">
               Convocatoria speakers <span aria-hidden="true" className="tedx-cta-link-arrow">{"->"}</span>
             </Link>
           </article>
@@ -70,7 +70,7 @@ export default function SponsorsCtaSection() {
             </h3>
             <Link
               href="/voluntariado"
-              className="group tedx-cta-link mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.14em] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              className="group tedx-cta-link mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.14em] text-white md:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:focus-visible:ring-black/70"
             >
               Conviertete en voluntario <span aria-hidden="true" className="tedx-cta-link-arrow">{"->"}</span>
             </Link>

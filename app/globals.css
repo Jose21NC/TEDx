@@ -104,6 +104,11 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html,
+  body {
+    scroll-behavior: auto;
+  }
+
   .animate-page-fade,
   .animate-slow-spin,
   .animate-soft-breathe,
@@ -113,7 +118,26 @@ body {
   .float-soft,
   .float-soft-slower,
   .float-medium,
-  .float-medium-slower { animation: none; }
+  .float-medium-slower {
+    animation: none;
+    transition: none !important;
+  }
+
+  .page-exit {
+    animation: none;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .tedx-cta-arc,
+  .float-soft,
+  .float-soft-slower,
+  .float-medium,
+  .float-medium-slower {
+    animation: none;
+  }
 }
 
 @media (min-width: 1024px) {

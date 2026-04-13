@@ -7,6 +7,7 @@ import MobileNav from "../components/MobileNav";
 import SponsorsMobileCarousel from "../components/SponsorsMobileCarousel";
 import logoBoreal from "../media/logoBoreal.png";
 import logoWhite from "../media/logo-white.png";
+import SponsorshipForm from "../components/ContactForm";
 
 export default function PatrociniosPage() {
   // Leer imágenes desde carpeta pública: public/patrocinadores
@@ -75,6 +76,8 @@ export default function PatrociniosPage() {
             <div className="mt-6">
               <Image src={logoWhite} alt="TEDx Avenida Bolivar" className="h-32 w-auto" />
             </div>
+
+            <SponsorshipForm />
 
             <div className="text-center text-sm text-gray-300 mt-2">
               <p>¿Quieres sumarte como patrocinador? <a href="mailto:contacto@tedxavenidabolivar.com" className="text-white underline">Contáctanos</a>.</p>

@@ -1,6 +1,6 @@
 "use client";
 import { FormEvent, useState } from "react";
-import { generateApplicantPDF } from "../../lib/pdfGenerator";
+import { generateApplicantPDF } from "../../lib/generators/pdfGenerator";
 import logoWhite from "../media/logo-white.png";
 
 export default function ConvocatoriaForm() {

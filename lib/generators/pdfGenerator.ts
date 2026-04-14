@@ -1,6 +1,6 @@
 import { pdf } from '@react-pdf/renderer';
 import QRCode from "qrcode";
-import { ApplicantPDF } from './ApplicantPDF';
+import { ApplicantPDF } from '../PDF/ApplicantPDF';
 import { saveAs } from 'file-saver';
 
 export async function generateApplicantPDF(p: any, logoSrc: string) {

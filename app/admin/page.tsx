@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import logoWhite from "../media/logo-white.png";
-import { generateApplicantPDF } from "../../lib/pdfGenerator";
+import { generateApplicantPDF } from "../../lib/generators/pdfGenerator";
 import { AuthProvider, useAuth } from "../components/Auth/AuthProvider";
 import ApplicantCard from "../components/admin/Postulant";
 import Footer from "../components/admin/Footer";

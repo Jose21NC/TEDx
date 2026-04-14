@@ -1,7 +1,7 @@
 import React from 'react';
 import { Document, Page, View, Text, Image } from '@react-pdf/renderer';
 
-import { styles } from './pdfStyles';
+import { styles } from '../pdfStyles';
 
 interface ApplicantPDFProps {
   p: any;

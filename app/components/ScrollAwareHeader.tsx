@@ -99,7 +99,7 @@ export default function ScrollAwareHeader() {
               </Link>
             </li>
             <li>
-              <Link className="transition hover:text-[var(--color-ted-red)]" href="/patrocinios">
+              <Link className="transition hover:text-[rgb(230,0,30)]" href="/patrocinios">
                 Patrocinadores
               </Link>
             </li>

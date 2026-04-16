@@ -92,50 +92,99 @@ function escapeHtml(value: string) {
 function buildEmailShell(content: {
   title: string;
   subtitle: string;
-  paragraphs: string[];
+  htmlContent: string;
   badge: string;
   ctaLabel?: string;
   ctaUrl?: string;
   logoSrc?: string;
+  showNewsletterFooter?: boolean;
 }) {
-  const paragraphsHtml = content.paragraphs
-    .map((paragraph) => `<p style=\"margin: 0 0 12px; color: #2c2c2c; font-size: 16px; line-height: 1.6;\">${escapeHtml(paragraph)}</p>`)
-    .join("");
   const ctaHtml = content.ctaLabel && content.ctaUrl
-    ? `<div style="margin-top:20px;"><a href="${escapeHtml(content.ctaUrl)}" target="_blank" rel="noreferrer" style="display:inline-block;background:#eb0028;color:#ffffff;text-decoration:none;border-radius:999px;padding:12px 20px;font-size:13px;font-weight:700;letter-spacing:0.02em;">${escapeHtml(content.ctaLabel)}</a></div>`
+    ? `<div style="margin-top:24px;"><a href="${content.ctaUrl}" target="_blank" rel="noreferrer" style="display:inline-block;background:#eb0028;color:#ffffff;text-decoration:none;border-radius:999px;padding:14px 24px;font-size:14px;font-weight:700;letter-spacing:0.02em;">${content.ctaLabel}</a></div>`
     : "";
 
-  return `
-    <div style="margin:0;padding:28px;background:#f3f3f3;font-family:'Inter',Arial,sans-serif;">
-      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e9e9e9;">
-        <tr>
-          <td style="padding:20px 24px;background:#111111;">
-            <img src="${escapeHtml(content.logoSrc || `cid:${tedxLogoCid}`)}" alt="TEDx Avenida Bolivar" style="display:block;max-width:230px;width:100%;height:auto;" />
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:24px 24px 20px;">
-            <p style="margin:0 0 14px;display:inline-block;background:#f9e9ec;color:#b3122f;border:1px solid #f3c7d0;border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">${escapeHtml(content.badge)}</p>
-            <h1 style="margin:0 0 10px;color:#d01438;font-size:30px;line-height:1.12;font-weight:800;">${escapeHtml(content.title)}</h1>
-            <p style="margin:0 0 18px;color:#5f5f5f;font-size:14px;line-height:1.5;">${escapeHtml(content.subtitle)}</p>
-            ${paragraphsHtml}
-            ${ctaHtml}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:16px 24px;background:#ffffff;">
-            <div style="height:4px;border-radius:999px;background:linear-gradient(90deg,#eb0028 0%,#111111 100%);"></div>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:18px 24px 24px;background:#fafafa;border-top:1px solid #efefef;">
-            <p style="margin:0 0 6px;color:#3b3b3b;font-size:13px;font-weight:700;line-height:1.5;">Equipo TEDx Avenida Bolivar</p>
-            <p style="margin:0;color:#6d6d6d;font-size:12px;line-height:1.5;">Managua, Nicaragua</p>
-          </td>
-        </tr>
-      </table>
+  const footerHtml = content.showNewsletterFooter ? `
+    <!-- Mailchimp Mandatory Footer -->
+    <div style="border-top:1px solid #eeeeee;padding-top:24px;color:#999999;font-size:11px;line-height:1.6;text-align:center;">
+      <p style="margin:0 0 8px;">Recibes este correo porque te suscribiste a nuestro newsletter o aplicaste a una convocatoria de TEDxAvenidaBolivar.</p>
+      <p style="margin:0 0 16px;">
+        <a href="*|UNSUB|*" style="color:#eb0028;text-decoration:underline;">Darse de baja (Unsubscribe)</a> | 
+        <a href="*|UPDATE_PROFILE|*" style="color:#eb0028;text-decoration:underline;">Actualizar preferencias</a>
+      </p>
+      <p style="margin:0;">*|HTML:LIST_ADDRESS_HTML|*</p>
+      <p style="margin:12px 0 0;">© ${new Date().getFullYear()} TEDx Avenida Bolivar. Todos los derechos reservados.</p>
+    </div>
+  ` : `
+    <!-- Standard Footer -->
+    <div style="border-top:1px solid #eeeeee;padding-top:20px;color:#999999;font-size:11px;line-height:1.5;text-align:center;">
+       <p style="margin:0;">Alianza Estratégica TEDx Avenida Bolivar. Nicaragua.</p>
+       <p style="margin:4px 0 0;">© ${new Date().getFullYear()} TEDx Avenida Bolivar. Todos los derechos reservados.</p>
     </div>
   `;
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${content.title}</title>
+    <style>
+        body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: #f4f4f4; }
+        table { border-spacing: 0; border-collapse: collapse; table-layout: fixed; margin: 0 auto; width: 100% !important; max-width: 600px !important; }
+        img { display: block; border: 0; height: auto; outline: none; text-decoration: none; max-width: 100% !important; }
+        .content-area img { max-width: 100% !important; height: auto !important; border-radius: 8px; margin: 12px 0; }
+        .main-container { padding: 40px 20px; }
+        p { margin: 0; }
+        a { text-decoration: none; color: #eb0028; }
+        * { box-sizing: border-box; }
+    </style>
+</head>
+<body style="background-color:#f4f4f4; margin:0; padding:0;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" align="center" style="background-color:#f4f4f4;">
+        <tr>
+            <td class="main-container">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#ffffff; border-radius:16px; overflow:hidden; border:1px solid #e0e0e0;">
+                    <!-- Header -->
+                    <tr>
+                        <td style="padding:28px; background-color:#111111; text-align:center;">
+                            <img src="${content.logoSrc || `cid:${tedxLogoCid}`}" alt="TEDx Avenida Bolivar" style="display:inline-block; max-width:220px; width:100%;" />
+                        </td>
+                    </tr>
+                    <!-- Main Body -->
+                    <tr>
+                        <td style="padding:40px 32px 32px;">
+                            <p style="margin:0 0 16px; display:inline-block; background-color:#f9e9ec; color:#b3122f; border:1px solid #f3c7d0; border-radius:20px; padding:6px 14px; font-size:10px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase;">${content.badge}</p>
+                            <h1 style="margin:0 0 12px; color:#000000; font-size:30px; line-height:1.2; font-weight:800; letter-spacing:-0.02em;">${content.title}</h1>
+                            <p style="margin:0 0 28px; color:#555555; font-size:16px; line-height:1.5;">${content.subtitle}</p>
+                            
+                            <div class="content-area" style="color:#222222; font-size:16px; line-height:1.65;">
+                                ${content.htmlContent}
+                            </div>
+
+                            ${ctaHtml}
+                        </td>
+                    </tr>
+                    <!-- Divider Accent -->
+                    <tr>
+                        <td style="padding:0 32px 32px;">
+                            <div style="height:4px; border-radius:2px; background:linear-gradient(90deg, #eb0028 0%, #111111 100%);"></div>
+                        </td>
+                    </tr>
+                    <!-- Sub-footer -->
+                    <tr>
+                        <td style="padding:0 32px 32px;">
+                            <p style="margin:0 0 6px; color:#111111; font-size:14px; font-weight:800; text-transform:uppercase; letter-spacing:0.03em;">TEDx Avenida Bolivar</p>
+                            <p style="margin:0 0 24px; color:#777777; font-size:12px; line-height:1.5;">Esta es una iniciativa independiente organizada bajo licencia de TED.</p>
+                            
+                            ${footerHtml}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
 }
 
 function getStatusChangeCopy(source: ConfirmationSource, recipientName: string, applicationStatus: string, trackingUrl: string) {
@@ -158,9 +207,10 @@ function getStatusChangeCopy(source: ConfirmationSource, recipientName: string, 
       title: `Hola, ${recipientName}`,
       subtitle: "Tu postulación tuvo una actualización",
       badge: "Cambio de estado",
-      paragraphs,
+      htmlContent: paragraphs.map(p => `<p style="margin: 0 0 12px; line-height: 1.6;">${escapeHtml(p)}</p>`).join(""),
       ctaLabel: "Ver estado de mi postulación",
       ctaUrl: trackingUrl,
+      showNewsletterFooter: false,
     }),
     text: [
       `Hola, ${recipientName}`,
@@ -193,7 +243,8 @@ function getConfirmationCopy(source: ConfirmationSource, recipientName: string) 
         title: `Gracias, ${recipientName}`,
         subtitle: "Confirmación de postulación de voluntariado",
         badge: "Postulación recibida",
-        paragraphs,
+        htmlContent: paragraphs.map(p => `<p style="margin: 0 0 12px; line-height: 1.6;">${escapeHtml(p)}</p>`).join(""),
+        showNewsletterFooter: false,
       }),
       text: [
         `Gracias, ${recipientName}`,
@@ -216,7 +267,8 @@ function getConfirmationCopy(source: ConfirmationSource, recipientName: string) 
         title: `Gracias, ${recipientName}`,
         subtitle: "Confirmación de postulación de speaker",
         badge: "Convocatoria de speakers",
-        paragraphs,
+        htmlContent: paragraphs.map(p => `<p style="margin: 0 0 12px; line-height: 1.6;">${escapeHtml(p)}</p>`).join(""),
+        showNewsletterFooter: false,
       }),
       text: [
         `Gracias, ${recipientName}`,
@@ -238,7 +290,8 @@ function getConfirmationCopy(source: ConfirmationSource, recipientName: string) 
       title: `Gracias, ${recipientName}`,
       subtitle: "Confirmación de solicitud de patrocinio",
       badge: "Solicitud recibida",
-      paragraphs,
+      htmlContent: paragraphs.map(p => `<p style="margin: 0 0 12px; line-height: 1.6;">${escapeHtml(p)}</p>`).join(""),
+      showNewsletterFooter: false,
     }),
     text: [
       `Gracias, ${recipientName}`,
@@ -392,16 +445,6 @@ export const newsletterActualizacion = onRequest(
       return;
     }
 
-    const paragraphs = messageText
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean);
-
-    if (paragraphs.length === 0) {
-      response.status(400).set(corsHeaders(request.headers.origin)).json({ error: "El mensaje no puede estar vacío." });
-      return;
-    }
-
     try {
       const authHeader = `Basic ${Buffer.from(`anystring:${mailchimpApiKey.value()}`).toString("base64")}`;
       const base = `https://${mailchimpServerPrefix.value()}.api.mailchimp.com/3.0`;
@@ -444,7 +487,8 @@ export const newsletterActualizacion = onRequest(
             subtitle: "Novedades para nuestra comunidad TEDx",
             badge: "Actualización newsletter",
             logoSrc: tedxLogoPublicUrl,
-            paragraphs,
+            htmlContent: messageText, // This will be raw HTML from the editor
+            showNewsletterFooter: true,
           }),
         }),
       });

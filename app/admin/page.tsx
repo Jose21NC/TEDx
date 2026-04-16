@@ -2,12 +2,16 @@
 import { useEffect, useState, useRef, type PointerEvent as ReactPointerEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import logoBlack from "../media/logo-black.png";
 import logoWhite from "../media/logo-white.png";
 import { generateApplicantPDF, generateSponsorPDF } from "../../lib/pdfGenerator";
 import { sendNewsletterUpdate, sendStatusChangeEmail } from "../../lib/notifications";
 import MobileNav from "../components/MobileNav";
+import WebsiteSponsorsManager from "./WebsiteSponsorsManager";
+import WebsiteTeamManager from "./WebsiteTeamManager";
+import RichTextEditor from "../components/RichTextEditor";
 
 type SponsorAspectMode = "square" | "rectangular";
 
@@ -1252,7 +1256,12 @@ export default function AdminPage() {
               <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] text-white sm:text-4xl">Panel de revisión</h1>
               <div className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-300">Alterna entre ponentes, sponsors, voluntariado y configuración de página con selección masiva, papelera segura y acciones por panel.</div>
             </div>
-            <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/45 p-1.5 shadow-inner shadow-black/40 sm:flex sm:w-auto sm:flex-nowrap sm:rounded-full">
+            <div className="flex flex-col lg:items-end gap-4">
+              <Link href="/admin/invitations" className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--color-ted-red)] px-5 py-2 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[var(--color-ted-red)] w-full sm:w-auto">
+                <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                Generar Invitación PDF
+              </Link>
+              <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/45 p-1.5 shadow-inner shadow-black/40 sm:flex sm:w-auto sm:flex-nowrap sm:rounded-full">
               <button
                 type="button"
                 onClick={() => setActivePanel("speakers")}
@@ -1281,6 +1290,7 @@ export default function AdminPage() {
               >
                 Pagina
               </button>
+              </div>
             </div>
           </div>
         </header>
@@ -1518,7 +1528,9 @@ export default function AdminPage() {
         </div>
 
         <div className={activePanel === "sponsors" ? "block" : "hidden"}>
-          <section className="mb-6 flex items-end justify-between gap-4">
+          <WebsiteSponsorsManager />
+
+          <section className="mb-6 mt-12 flex items-end justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-white">Solicitudes de patrocinio</h2>
               <div className="text-sm text-gray-400">Colección actual: <span className="font-mono text-[var(--color-ted-red)]">sponsorsTedx</span></div>
@@ -1902,64 +1914,98 @@ export default function AdminPage() {
                 </div>
               </article>
             );})}
+            <WebsiteTeamManager />
           </section>
         </div>
 
         <div className={activePanel === "page" ? "block" : "hidden"}>
-          <section className="space-y-6 rounded-2xl border border-white/10 bg-white/5 p-8 text-white shadow-[0_18px_60px_rgba(0,0,0,0.2)]">
-            <div>
-              <h2 className="text-2xl font-bold">Editor de Pagina</h2>
-              <p className="mt-3 text-sm text-gray-300">Configura envíos masivos para la comunidad del newsletter desde este módulo.</p>
+          <section className="space-y-8 rounded-2xl border border-white/10 bg-white/5 p-10 text-white shadow-[0_25px_80px_rgba(0,0,0,0.3)] backdrop-blur-md">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-3xl font-black tracking-tighter">Editor de Página</h2>
+                <p className="mt-3 max-w-xl text-base text-gray-400 leading-relaxed font-medium">
+                  Controla los módulos dinámicos del sitio web y gestiona la comunicación directa con tu audiencia.
+                </p>
+              </div>
+              <div className="rounded-full bg-white/10 p-3 text-white">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-black/40 p-5">
-              <h3 className="text-lg font-semibold text-white">Enviar actualización a contactos del newsletter</h3>
-              <p className="mt-1 text-xs text-gray-400">Esta acción crea y envía una campaña en Mailchimp al audience configurado.</p>
-
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-gray-400">Asunto</label>
-                  <input
-                    value={newsletterSubject}
-                    onChange={(e) => setNewsletterSubject(e.target.value)}
-                    placeholder="Ej. Novedades TEDx de esta semana"
-                    className="w-full rounded-xl border border-white/15 bg-black/50 px-4 py-3 text-sm text-white outline-none transition focus:border-[var(--color-ted-red)]"
-                  />
+            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-black/60 p-8 shadow-2xl">
+              {/* Decorative accent */}
+              <div className="absolute top-0 right-0 h-32 w-32 -translate-y-1/2 translate-x-1/2 rounded-full bg-[rgb(230,0,30)]/10 blur-3xl" />
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgb(230,0,30)]/20 text-[rgb(230,0,30)]">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                   </div>
+                   <div>
+                      <h3 className="text-xl font-bold text-white tracking-tight">Campaña de Newsletter</h3>
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-widest">Sincronizado con Mailchimp Audience</p>
+                   </div>
                 </div>
-                <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-gray-400">Titular</label>
-                  <input
-                    value={newsletterHeadline}
-                    onChange={(e) => setNewsletterHeadline(e.target.value)}
-                    placeholder="Titular principal del correo"
-                    className="w-full rounded-xl border border-white/15 bg-black/50 px-4 py-3 text-sm text-white outline-none transition focus:border-[var(--color-ted-red)]"
-                  />
+
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-[0.2em] text-gray-500">Asunto del Correo</label>
+                    <input
+                      value={newsletterSubject}
+                      onChange={(e) => setNewsletterSubject(e.target.value)}
+                      placeholder="Ej. ¡Nuevos ponentes confirmados!"
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm text-white outline-none transition-all focus:border-[rgb(230,0,30)] focus:ring-1 focus:ring-[rgb(230,0,30)] placeholder:text-gray-600"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-[0.2em] text-gray-500">Titular del Mensaje</label>
+                    <input
+                      value={newsletterHeadline}
+                      onChange={(e) => setNewsletterHeadline(e.target.value)}
+                      placeholder="Mensaje destacado en negrita"
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm text-white outline-none transition-all focus:border-[rgb(230,0,30)] focus:ring-1 focus:ring-[rgb(230,0,30)] placeholder:text-gray-600"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-4">
-                <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-gray-400">Mensaje</label>
-                <textarea
-                  value={newsletterMessageText}
-                  onChange={(e) => setNewsletterMessageText(e.target.value)}
-                  rows={7}
-                  placeholder="Escribe el contenido. Cada salto de línea se verá como párrafo en el correo."
-                  className="w-full rounded-2xl border border-white/15 bg-black/50 px-4 py-3 text-sm text-white outline-none transition focus:border-[var(--color-ted-red)]"
-                />
-              </div>
+                <div className="mt-6 space-y-2">
+                  <label className="text-xs font-black uppercase tracking-[0.2em] text-gray-500">Cuerpo del Mensaje</label>
+                  <RichTextEditor
+                    value={newsletterMessageText}
+                    onChange={setNewsletterMessageText}
+                    placeholder="Escribe el contenido detallado aquí..."
+                  />
+                  <p className="text-[10px] text-gray-400 mt-2 italic font-medium">Usa la barra de herramientas para dar formato y agregar imágenes de alto impacto.</p>
+                </div>
 
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleSendNewsletterUpdate}
-                  disabled={newsletterSending}
-                  className="rounded-full bg-[var(--color-ted-red)] px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {newsletterSending ? "Enviando campaña..." : "Enviar actualización"}
-                </button>
-                {newsletterFeedback ? (
-                  <p className="text-xs font-medium text-gray-200">{newsletterFeedback}</p>
-                ) : null}
+                <div className="mt-8 flex flex-wrap items-center justify-between gap-6 border-t border-white/5 pt-8">
+                  <div className="flex-1 min-w-[200px]">
+                    {newsletterFeedback && (
+                      <motion.div 
+                        initial={{ opacity: 0, x: -10 }} 
+                        animate={{ opacity: 1, x: 0 }}
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold ${newsletterFeedback.includes('Error') ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}
+                      >
+                        <span className="h-2 w-2 rounded-full bg-current animate-pulse" />
+                        {newsletterFeedback}
+                      </motion.div>
+                    )}
+                  </div>
+                  
+                  <button
+                    type="button"
+                    onClick={handleSendNewsletterUpdate}
+                    disabled={newsletterSending}
+                    className="group relative flex items-center gap-3 overflow-hidden rounded-full bg-[rgb(230,0,30)] px-8 py-4 text-sm font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 shadow-[0_15px_35px_rgba(230,0,30,0.3)]"
+                  >
+                    <span className="relative z-10">
+                      {newsletterSending ? "Enviando..." : "Desplegar Campaña"}
+                    </span>
+                    {!newsletterSending && (
+                      <svg className="w-5 h-5 relative z-10 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </section>

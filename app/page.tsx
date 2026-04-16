@@ -6,6 +6,7 @@ import SpeakersShowcase from "./components/SpeakersShowcase";
 import SideScrollParticles from "./components/SideScrollParticles";
 import SponsorsSection from "./components/SponsorsSection";
 import SponsorsCtaSection from "./components/SponsorsCtaSection";
+import TicketsNotifyModal from "./components/TicketsNotifyModal";
 
 export const metadata: Metadata = {
   title: "TEDx Avenida Bolivar | Ideas que vale la pena compartir",
@@ -98,12 +99,7 @@ export default function Home() {
                 Una experiencia TEDx con ideas que vale la pena compartir, diseñada para abrir conversación y conectar a la comunidad.
               </p>
               <div>
-                <span
-                  aria-disabled="true"
-                  className="inline-flex min-h-12 cursor-not-allowed items-center justify-center rounded-md bg-white/12 px-6 py-3 text-base font-semibold text-white/90 ring-1 ring-white/20"
-                >
-                  Entradas Proximamente
-                </span>
+                <TicketsNotifyModal />
               </div>
             </div>
           </div>

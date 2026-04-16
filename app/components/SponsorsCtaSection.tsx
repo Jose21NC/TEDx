@@ -92,10 +92,10 @@ export default function SponsorsCtaSection() {
           </p>
 
           <form onSubmit={handleSubmit} className="w-full max-w-[560px] md:justify-self-end">
-            <label htmlFor="cta-email" className="block text-2xl font-black tracking-tight text-black md:text-4xl">
-              Tu correo
+            <label htmlFor="cta-email" className="block text-2xl font-black tracking-tight text-black md:text-3xl mb-4 text-left">
+              Mantente al día
             </label>
-            <div className="mt-3 flex gap-3 border-b-[3px] border-black pb-2">
+            <div className="relative flex items-center w-full bg-white/90 backdrop-blur-sm rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-1.5 transition-all focus-within:ring-4 focus-within:ring-white/40 focus-within:bg-white text-left">
               <input
                 suppressHydrationWarning
                 id="cta-email"
@@ -103,16 +103,24 @@ export default function SponsorsCtaSection() {
                 required
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="nombre@correo.com"
-                className="min-w-0 flex-1 bg-transparent text-lg font-semibold text-black placeholder:text-black/65 outline-none"
+                placeholder="Ingresa tu mejor correo..."
+                className="w-full bg-transparent pl-5 pr-4 py-3 text-[15px] font-semibold text-black placeholder:text-gray-500 outline-none"
               />
-              <button type="submit" disabled={submitting} className="rounded-sm bg-black px-5 py-2 text-lg font-bold text-white transition hover:bg-[#1f1f1f] disabled:cursor-not-allowed disabled:opacity-70">
-                {submitting ? "Enviando" : "Enviar"}
+              <button 
+                type="submit" 
+                disabled={submitting} 
+                className="relative overflow-hidden group shrink-0 rounded-full bg-black px-8 py-3 text-sm font-bold tracking-widest uppercase text-white transition-all hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+              >
+                <span className="relative z-10">{submitting ? "Enviando" : "Suscribirme"}</span>
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
               </button>
             </div>
-            <p aria-live="polite" className="mt-3 min-h-6 text-sm font-medium text-black/75">
-              {feedback}
-            </p>
+            
+            <div className="mt-4 flex items-center justify-between">
+              <p aria-live="polite" className="min-h-6 text-sm font-bold text-black/80">
+                {feedback}
+              </p>
+            </div>
           </form>
         </div>
 

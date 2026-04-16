@@ -19,6 +19,14 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#EDEDED',
   },
+  headerBlack: {
+    backgroundColor: '#111111',
+    height: 94,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 42,
+  },
   headerRed: {
     backgroundColor: '#EB0028',
     height: 7,

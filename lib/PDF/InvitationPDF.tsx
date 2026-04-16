@@ -12,6 +12,8 @@ interface InvitationPDFProps {
     curriculum: string;
     redes: string[];
     qrCodeStr?: string;
+    genero?: string;
+    tipo?: string;
   };
   logoSrc: string;
   signatureSrc?: string;

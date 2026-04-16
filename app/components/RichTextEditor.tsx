@@ -9,10 +9,10 @@ import { getClientStorage } from "../../lib/firebaseClient";
 const ReactQuill = dynamic(
   async () => {
     const { default: RQ } = await import("react-quill-new");
-    return RQ;
+    return (props: any) => <RQ {...props} />;
   },
   { ssr: false, loading: () => <div className="h-80 w-full animate-pulse bg-white/5 rounded-2xl border border-white/10" /> }
-);
+) as any;
 
 import "react-quill-new/dist/quill.snow.css";
 

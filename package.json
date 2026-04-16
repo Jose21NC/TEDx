@@ -8,8 +8,9 @@
     "export": "next build && next export",
     "start": "next start -p ${PORT:-3000}",
     "lint": "eslint",
-    "deploy:functions:safe": "npx firebase-tools@13.32.0 deploy --project borealabsweb --only functions:confirmacion,functions:newsletter,functions:newsletterActualizacion",
-    "deploy:functions:all:safe": "npx firebase-tools@13.32.0 deploy --project borealabsweb --only functions:confirmacion,functions:newsletter,functions:newsletterActualizacion,functions:generateCertificates,functions:mergeCertificatesPdf,functions:processVolunteerAttendanceCredits",
+    "migrate:firestore": "node scripts/firestore-migrate.js",
+    "deploy:functions:safe": "npx firebase-tools@13.32.0 deploy --only functions:confirmacion,functions:newsletter,functions:newsletterActualizacion",
+    "deploy:functions:all:safe": "npx firebase-tools@13.32.0 deploy --only functions:confirmacion,functions:newsletter,functions:newsletterActualizacion,functions:generateCertificates,functions:mergeCertificatesPdf,functions:processVolunteerAttendanceCredits",
     "test:notifications:local": "node scripts/smoke-notifications.mjs"
   },
   "dependencies": {

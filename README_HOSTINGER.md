@@ -15,11 +15,11 @@ Pasos resumidos para sitio estático
 Variables públicas de Firebase para el cliente
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
 - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` (opcional)
-- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID` (boreal-50422)
 - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` (opcional)
 - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` (opcional)
 - `NEXT_PUBLIC_FIREBASE_APP_ID` (opcional)
-- `NEXT_PUBLIC_NOTIFICATION_API_BASE_URL`
+- `NEXT_PUBLIC_NOTIFICATION_API_BASE_URL` (https://us-central1-boreal-50422.cloudfunctions.net)
 
 IMPORTANTE: estas variables serán embebidas en el sitio estático y por tanto son públicas. Para aceptar envíos seguros desde el cliente, debes ajustar las reglas de Firestore para permitir escrituras controladas o usar alguna otra capa de validación (reCAPTCHA, verificación por correo, etc.).
 

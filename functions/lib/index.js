@@ -15,9 +15,9 @@ Object.defineProperty(exports, "generateCertificates", { enumerable: true, get: 
 Object.defineProperty(exports, "mergeCertificatesPdf", { enumerable: true, get: function () { return legacyRestore_js_1.mergeCertificatesPdf; } });
 Object.defineProperty(exports, "processVolunteerAttendanceCredits", { enumerable: true, get: function () { return legacyRestore_js_1.processVolunteerAttendanceCredits; } });
 (0, app_1.initializeApp)();
-const resendApiKey = (0, params_1.defineSecret)("RESEND_API_KEY");
+const resendApiKey = (0, params_1.defineString)("RESEND_API_KEY");
 const resendFromEmail = (0, params_1.defineString)("RESEND_FROM_EMAIL");
-const mailchimpApiKey = (0, params_1.defineSecret)("MAILCHIMP_API_KEY");
+const mailchimpApiKey = (0, params_1.defineString)("MAILCHIMP_API_KEY");
 const mailchimpAudienceId = (0, params_1.defineString)("MAILCHIMP_AUDIENCE_ID");
 const mailchimpServerPrefix = (0, params_1.defineString)("MAILCHIMP_SERVER_PREFIX");
 const tedxLogoCid = "tedx-logo@tedxavenidabolivar";
@@ -220,7 +220,7 @@ async function resendEmail(recipientEmail, subject, html, text, attachments) {
         throw new Error(errorText || "No se pudo enviar el correo de confirmación.");
     }
 }
-exports.confirmacion = (0, https_1.onRequest)({ cors: true, secrets: [resendApiKey] }, async (request, response) => {
+exports.confirmacion = (0, https_1.onRequest)({ cors: true }, async (request, response) => {
     if (request.method === "OPTIONS") {
         response.status(204).set(corsHeaders(request.headers.origin)).send("");
         return;
@@ -257,7 +257,7 @@ exports.confirmacion = (0, https_1.onRequest)({ cors: true, secrets: [resendApiK
         });
     }
 });
-exports.newsletter = (0, https_1.onRequest)({ cors: true, secrets: [mailchimpApiKey] }, async (request, response) => {
+exports.newsletter = (0, https_1.onRequest)({ cors: true }, async (request, response) => {
     if (request.method === "OPTIONS") {
         response.status(204).set(corsHeaders(request.headers.origin)).send("");
         return;
@@ -298,7 +298,7 @@ exports.newsletter = (0, https_1.onRequest)({ cors: true, secrets: [mailchimpApi
         });
     }
 });
-exports.newsletterActualizacion = (0, https_1.onRequest)({ cors: true, secrets: [mailchimpApiKey] }, async (request, response) => {
+exports.newsletterActualizacion = (0, https_1.onRequest)({ cors: true }, async (request, response) => {
     if (request.method === "OPTIONS") {
         response.status(204).set(corsHeaders(request.headers.origin)).send("");
         return;

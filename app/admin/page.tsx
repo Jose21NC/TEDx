@@ -11,6 +11,10 @@ import MobileNav from "../components/MobileNav";
 
 type SponsorAspectMode = "square" | "rectangular";
 
+const SPEAKER_TRASH_COLLECTION = "ponentesTedxTrash";
+const SPONSOR_TRASH_COLLECTION = "sponsorsTedxTrash";
+const VOLUNTEER_TRASH_COLLECTION = "voluntariosTedxTrash";
+
 async function cropSponsorLogoFile(
   file: File,
   options: { aspectMode: SponsorAspectMode; zoom: number; offsetX: number; offsetY: number },
@@ -401,7 +405,7 @@ export default function AdminPage() {
   }
 
   function selectAll() {
-    setSelectedIds(posts.map(p => p.id));
+    setSelectedIds(getPanelRecords().map((item) => item.id));
   }
 
   function clearSelection() {
@@ -415,31 +419,37 @@ export default function AdminPage() {
       const firebaseModule = await import("../../lib/firebaseClient");
       const firestore = await import("firebase/firestore");
       const db = firebaseModule.getClientDb();
+      const currentPanel = activePanel;
+      const collectionName = getPanelCollectionName(currentPanel);
+      const sourceRecords = getPanelRecords(currentPanel);
+
       for (const id of selectedIds) {
-        const docRef = firestore.doc(db, "ponentesTedx", id);
+        const docRef = firestore.doc(db, collectionName, id);
         await firestore.updateDoc(docRef, { status });
-        const speaker = posts.find((item) => item.id === id);
-        const speakerEmail = speaker?.correo?.trim();
-        if (speakerEmail) {
+        const targetRecord = sourceRecords.find((item) => item.id === id);
+        const recipientEmail = getRecordEmail(targetRecord, currentPanel);
+        if (recipientEmail) {
           try {
             await sendStatusChangeEmail({
-              recipientEmail: speakerEmail,
-              recipientName: (speaker?.nombre ?? "Participante").trim(),
-              source: "speakers",
+              recipientEmail,
+              recipientName: getRecordName(targetRecord, currentPanel).trim(),
+              source: currentPanel === "sponsors" ? "patrocinios" : currentPanel === "volunteers" ? "voluntariado" : "speakers",
               applicationStatus: status,
               trackingUrl: `${window.location.origin}/status?id=${id}`,
             });
           } catch (mailError) {
-            console.error("Error sending bulk speaker status email:", mailError);
+            console.error("Error sending bulk status email:", mailError);
           }
         }
       }
-      const col = firestore.collection(db, "ponentesTedx");
+      const col = firestore.collection(db, collectionName);
       const snap = await firestore.getDocs(col);
       const items: Array<any> = [];
       snap.forEach(d => items.push({ ...d.data(), id: d.id }));
       items.sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0));
-      setPosts(items);
+      if (currentPanel === "sponsors") setSponsors(items);
+      else if (currentPanel === "volunteers") setVolunteers(items);
+      else setPosts(items);
       clearSelection();
     } catch (err: any) {
       console.error(err);
@@ -466,14 +476,8 @@ export default function AdminPage() {
         : kind === "sponsor"
           ? sponsors.find((item) => item.id === id)
           : volunteers.find((item) => item.id === id);
-      const recipientEmail = kind === "speaker"
-        ? targetRecord?.correo?.trim()
-        : targetRecord?.email?.trim();
-      const recipientName = kind === "speaker"
-        ? (targetRecord?.nombre ?? "Participante").trim()
-        : kind === "sponsor"
-          ? (targetRecord?.contactName ?? targetRecord?.companyName ?? "Participante").trim()
-          : (targetRecord?.fullName ?? "Participante").trim();
+      const recipientEmail = getRecordEmail(targetRecord, kind === "speaker" ? "speakers" : kind === "sponsor" ? "sponsors" : "volunteers");
+      const recipientName = getRecordName(targetRecord, kind === "speaker" ? "speakers" : kind === "sponsor" ? "sponsors" : "volunteers").trim();
 
       if (recipientEmail) {
         try {
@@ -507,22 +511,48 @@ export default function AdminPage() {
 
   async function deleteSelected() {
     if (selectedIds.length === 0) return;
-    if (!confirm(`Eliminar ${selectedIds.length} postulación(es)? Esta acción no se puede deshacer.`)) return;
+
+    const confirmation = window.prompt(
+      `Vas a mover ${selectedIds.length} postulación(es) a la papelera segura.\n\nEscribe ELIMINAR para continuar.`,
+    );
+
+    if (confirmation !== "ELIMINAR") return;
+
     setProcessing(true);
     try {
       const firebaseModule = await import("../../lib/firebaseClient");
       const firestore = await import("firebase/firestore");
       const db = firebaseModule.getClientDb();
+      const currentPanel = activePanel;
+      const collectionName = getPanelCollectionName(currentPanel);
+      const trashCollectionName = getPanelTrashCollection(currentPanel);
+      const records = getPanelRecords(currentPanel);
+
       for (const id of selectedIds) {
-        const docRef = firestore.doc(db, "ponentesTedx", id);
+        const record = records.find((item) => item.id === id);
+        if (!record) continue;
+
+        const trashRef = firestore.doc(db, trashCollectionName, id);
+        await firestore.setDoc(trashRef, {
+          ...record,
+          deletedAt: firestore.serverTimestamp(),
+          deletedBy: loginEmail.trim() || "admin",
+          sourceCollection: collectionName,
+          sourceDocId: id,
+        });
+
+        const docRef = firestore.doc(db, collectionName, id);
         await firestore.deleteDoc(docRef);
       }
-      const col = firestore.collection(db, "ponentesTedx");
+
+      const col = firestore.collection(db, collectionName);
       const snap = await firestore.getDocs(col);
       const items: Array<any> = [];
       snap.forEach(d => items.push({ ...d.data(), id: d.id }));
       items.sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0));
-      setPosts(items);
+      if (currentPanel === "sponsors") setSponsors(items);
+      else if (currentPanel === "volunteers") setVolunteers(items);
+      else setPosts(items);
       clearSelection();
     } catch (err: any) {
       console.error(err);
@@ -566,6 +596,48 @@ export default function AdminPage() {
     if (value === "especie") return "En especie";
     if (value === "personalizado") return "Personalizado";
     return value;
+  }
+
+  function getPanelRecords(panel = activePanel) {
+    if (panel === "sponsors") return sponsors;
+    if (panel === "volunteers") return volunteers;
+    return posts;
+  }
+
+  function getPanelCollectionName(panel = activePanel) {
+    if (panel === "sponsors") return "sponsorsTedx";
+    if (panel === "volunteers") return "voluntariosTedx";
+    return "ponentesTedx";
+  }
+
+  function getPanelTrashCollection(panel = activePanel) {
+    if (panel === "sponsors") return SPONSOR_TRASH_COLLECTION;
+    if (panel === "volunteers") return VOLUNTEER_TRASH_COLLECTION;
+    return SPEAKER_TRASH_COLLECTION;
+  }
+
+  function getSelectionSummary(panel = activePanel) {
+    if (panel === "sponsors") return "patrocinios seleccionados";
+    if (panel === "volunteers") return "voluntarios seleccionados";
+    return "postulaciones seleccionadas";
+  }
+
+  function getBulkStatusOptions(panel = activePanel) {
+    if (panel === "sponsors") return ["Pendiente", "En contacto", "Finalizado", "No aprobado"];
+    if (panel === "volunteers") return ["Pendiente", "En revision", "Aprobado", "Rechazado"];
+    return ["Pendiente", "Aprobada", "Rechazada", "Reserva"];
+  }
+
+  function getRecordName(record: any, panel = activePanel) {
+    if (panel === "sponsors") return record?.contactName ?? record?.companyName ?? "Participante";
+    if (panel === "volunteers") return record?.fullName ?? "Participante";
+    return record?.nombre ?? "Participante";
+  }
+
+  function getRecordEmail(record: any, panel = activePanel) {
+    if (panel === "sponsors") return record?.email?.trim();
+    if (panel === "volunteers") return record?.email?.trim();
+    return record?.correo?.trim();
   }
 
   function normalizeSpeakerStatus(value: string | undefined) {
@@ -738,6 +810,7 @@ export default function AdminPage() {
       </div>
     );
   }
+              <div className="mt-1 text-xs text-gray-500">La papelera segura usa <span className="font-mono text-gray-300">{SPONSOR_TRASH_COLLECTION}</span>.</div>
 
   function renderExpandableText(recordId: string, field: string, text: string | null | undefined) {
     const safeText = (text || "").trim() || "—";
@@ -1142,7 +1215,7 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-dvh flex flex-col overflow-x-hidden bg-[#1a1a1a] text-white selection:bg-[var(--color-ted-red)] selection:text-white animate-page-fade">
+    <main className="min-h-dvh flex flex-col overflow-x-hidden bg-[radial-gradient(circle_at_top,rgba(235,0,40,0.18),transparent_35%),linear-gradient(180deg,#111827_0%,#050505_100%)] text-white selection:bg-[var(--color-ted-red)] selection:text-white animate-page-fade">
       <header className="border-b border-black/5 bg-black text-[#222] sticky top-0 z-20 shadow-md">
         <nav className="relative mx-auto flex w-full max-w-[88rem] items-center justify-between px-6 py-0.5">
           <Link href="/" className="flex items-center">
@@ -1172,10 +1245,43 @@ export default function AdminPage() {
           </div>
         ) : null}
 
-        <header className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2 text-white">Panel de Revisión</h1>
-            <div className="text-sm text-gray-400">Alterna entre ponentes, sponsors, voluntariado y configuración de página.</div>
+        <header className="mb-8 overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.2)] backdrop-blur-sm sm:p-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-[var(--color-ted-red)]">Administrador TEDx Avenida Bolivar</p>
+              <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] text-white sm:text-4xl">Panel de revisión</h1>
+              <div className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-300">Alterna entre ponentes, sponsors, voluntariado y configuración de página con selección masiva, papelera segura y acciones por panel.</div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/45 p-1.5 shadow-inner shadow-black/40 sm:flex sm:w-auto sm:flex-nowrap sm:rounded-full">
+              <button
+                type="button"
+                onClick={() => setActivePanel("speakers")}
+                className={`min-w-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:flex-1 sm:px-5 ${activePanel === "speakers" ? "bg-[var(--color-ted-red)] text-white shadow-lg" : "text-gray-300 hover:text-white"}`}
+              >
+                Ponentes
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivePanel("sponsors")}
+                className={`min-w-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:flex-1 sm:px-5 ${activePanel === "sponsors" ? "bg-[var(--color-ted-red)] text-white shadow-lg" : "text-gray-300 hover:text-white"}`}
+              >
+                Sponsors
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivePanel("volunteers")}
+                className={`min-w-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:flex-1 sm:px-5 ${activePanel === "volunteers" ? "bg-[var(--color-ted-red)] text-white shadow-lg" : "text-gray-300 hover:text-white"}`}
+              >
+                Voluntariado
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivePanel("page")}
+                className={`min-w-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:flex-1 sm:px-5 ${activePanel === "page" ? "bg-[var(--color-ted-red)] text-white shadow-lg" : "text-gray-300 hover:text-white"}`}
+              >
+                Pagina
+              </button>
+            </div>
           </div>
         </header>
 
@@ -1199,36 +1305,7 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div className="grid w-full grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/50 p-1.5 shadow-inner shadow-black/40 sm:flex sm:w-auto sm:flex-nowrap sm:rounded-full">
-            <button
-              type="button"
-              onClick={() => setActivePanel("speakers")}
-              className={`min-w-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:flex-1 sm:px-5 ${activePanel === "speakers" ? "bg-[var(--color-ted-red)] text-white shadow-lg" : "text-gray-300 hover:text-white"}`}
-            >
-              Ponentes
-            </button>
-            <button
-              type="button"
-              onClick={() => setActivePanel("sponsors")}
-              className={`min-w-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:flex-1 sm:px-5 ${activePanel === "sponsors" ? "bg-[var(--color-ted-red)] text-white shadow-lg" : "text-gray-300 hover:text-white"}`}
-            >
-              Sponsors
-            </button>
-            <button
-              type="button"
-              onClick={() => setActivePanel("volunteers")}
-              className={`min-w-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:flex-1 sm:px-5 ${activePanel === "volunteers" ? "bg-[var(--color-ted-red)] text-white shadow-lg" : "text-gray-300 hover:text-white"}`}
-            >
-              Voluntariado
-            </button>
-            <button
-              type="button"
-              onClick={() => setActivePanel("page")}
-              className={`min-w-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:flex-1 sm:px-5 ${activePanel === "page" ? "bg-[var(--color-ted-red)] text-white shadow-lg" : "text-gray-300 hover:text-white"}`}
-            >
-              Pagina
-            </button>
-          </div>
+          <div className="hidden md:block" />
         </div>
 
         <section className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1237,19 +1314,32 @@ export default function AdminPage() {
               Acciones <span className="text-[10px] ml-2">▼</span>
             </button>
             {menuOpen && (
-              <div className="absolute left-0 mt-2 w-56 rounded-md border border-gray-700 bg-black p-1.5 shadow-xl text-white">
+              <div className="absolute left-0 mt-2 w-64 rounded-2xl border border-gray-700 bg-black p-1.5 text-white shadow-xl">
                 <button onClick={() => { setSelectionMode(true); setMenuOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-800 rounded transition-colors">Activar selección</button>
                 <button onClick={() => { setSelectionMode(false); clearSelection(); setMenuOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-800 rounded transition-colors">Desactivar selección</button>
-                {selectionMode && (
+                {selectionMode && activePanel !== "page" && (
                   <>
                     <button onClick={() => { selectAll(); setMenuOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-800 rounded transition-colors">Seleccionar todo</button>
                     <div className="my-1 h-px bg-gray-800 mx-1" />
-                    <button onClick={() => { setMenuOpen(false); updateStatusForSelected('Aprobada'); }} disabled={processing || selectedIds.length===0} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-800 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-green-400">Marcar Aprobada</button>
-                    <button onClick={() => { setMenuOpen(false); updateStatusForSelected('Rechazada'); }} disabled={processing || selectedIds.length===0} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-800 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-[var(--color-ted-red)]">Marcar Rechazada</button>
-                    <button onClick={() => { setMenuOpen(false); updateStatusForSelected('Reserva'); }} disabled={processing || selectedIds.length===0} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-800 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-yellow-300">Marcar Reserva</button>
-                    <button onClick={() => { setMenuOpen(false); updateStatusForSelected('Pendiente'); }} disabled={processing || selectedIds.length===0} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-800 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-300">Marcar Pendiente</button>
+                    {getBulkStatusOptions().map((statusOption) => {
+                      const isPositive = /aprobad|finalizado/i.test(statusOption);
+                      const isDanger = /rechazad|no aprobado/i.test(statusOption);
+                      const isWarning = /reserva/i.test(statusOption);
+                      const textClass = isPositive ? "text-green-400" : isDanger ? "text-[var(--color-ted-red)]" : isWarning ? "text-yellow-300" : "text-gray-300";
+
+                      return (
+                        <button
+                          key={statusOption}
+                          onClick={() => { setMenuOpen(false); updateStatusForSelected(statusOption); }}
+                          disabled={processing || selectedIds.length === 0}
+                          className={`w-full rounded px-3 py-2 text-left text-sm transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-30 ${textClass}`}
+                        >
+                          Marcar {statusOption}
+                        </button>
+                      );
+                    })}
                     <div className="my-1 h-px bg-gray-800 mx-1" />
-                    <button onClick={() => { setMenuOpen(false); deleteSelected(); }} disabled={processing || selectedIds.length===0} className="w-full text-left px-3 py-2 text-sm text-[var(--color-ted-red)] font-semibold hover:bg-gray-800 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors">Eliminar items</button>
+                    <button onClick={() => { setMenuOpen(false); deleteSelected(); }} disabled={processing || selectedIds.length===0} className="w-full text-left px-3 py-2 text-sm text-[var(--color-ted-red)] font-semibold hover:bg-gray-800 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors">Mover a papelera segura</button>
                   </>
                 )}
               </div>
@@ -1257,7 +1347,7 @@ export default function AdminPage() {
           </div>
 
           <div className="flex items-center gap-4 text-sm">
-            {selectionMode && <span className="bg-black border border-gray-600 px-3 py-1.5 rounded-full text-white font-mono shadow-inner shadow-black/50 tracking-wider text-xs uppercase">SELECCIONADOS: {selectedIds.length}</span>}
+            {selectionMode && activePanel !== "page" ? <span className="bg-black border border-gray-600 px-3 py-1.5 rounded-full text-white font-mono shadow-inner shadow-black/50 tracking-wider text-xs uppercase">{getSelectionSummary()}: {selectedIds.length}</span> : null}
           </div>
         </section>
 
@@ -1266,6 +1356,7 @@ export default function AdminPage() {
             <div>
               <h2 className="text-2xl font-bold text-white">Solicitudes de postulación</h2>
               <div className="text-sm text-gray-400">Colección actual: <span className="font-mono text-[var(--color-ted-red)]">ponentesTedx</span></div>
+              <div className="mt-1 text-xs text-gray-500">Las eliminaciones se respaldan en <span className="font-mono text-gray-300">{SPEAKER_TRASH_COLLECTION}</span> antes de borrar el registro original.</div>
             </div>
           </section>
 
@@ -1431,6 +1522,7 @@ export default function AdminPage() {
             <div>
               <h2 className="text-2xl font-bold text-white">Solicitudes de patrocinio</h2>
               <div className="text-sm text-gray-400">Colección actual: <span className="font-mono text-[var(--color-ted-red)]">sponsorsTedx</span></div>
+              <div className="mt-1 text-xs text-gray-500">La papelera segura usa <span className="font-mono text-gray-300">{SPONSOR_TRASH_COLLECTION}</span>.</div>
             </div>
           </section>
 
@@ -1448,33 +1540,38 @@ export default function AdminPage() {
               <article key={sponsor.id} className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 text-black shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl">
                 <div className="absolute left-0 top-0 h-full w-2" style={{ backgroundColor: sponsorStatusColor(sponsor.status) }} />
                 <div className="mb-4 flex flex-col gap-3 pl-4 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="text-2xl font-bold tracking-tight text-gray-900">{sponsor.companyName || "—"}</h3>
-                      <div className="relative" ref={cardMenuFor?.kind === "sponsor" && cardMenuFor.id === sponsor.id ? cardMenuRef : undefined}>
-                        <button
-                          type="button"
-                          onClick={() => setCardMenuFor(cardMenuFor?.kind === "sponsor" && cardMenuFor.id === sponsor.id ? null : { kind: "sponsor", id: sponsor.id })}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-lg font-semibold text-gray-500 transition hover:border-[var(--color-ted-red)] hover:text-[var(--color-ted-red)]"
-                          aria-label="Editar solicitud"
-                        >
-                          ⋯
-                        </button>
-                        {cardMenuFor?.kind === "sponsor" && cardMenuFor.id === sponsor.id ? (
-                          <div className="absolute left-0 top-11 z-50 w-48 rounded-xl border border-gray-200 bg-white p-2 shadow-[0_14px_40px_rgba(0,0,0,0.15)]">
-                            <button type="button" onClick={() => openEdit("sponsor", sponsor)} className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 transition hover:bg-gray-50">
-                              Editar solicitud
-                            </button>
-                          </div>
-                        ) : null}
+                  <div className="flex items-start gap-3">
+                    {selectionMode ? (
+                      <input type="checkbox" checked={selectedIds.includes(sponsor.id)} onChange={() => toggleSelect(sponsor.id)} className="mt-2 h-5 w-5 cursor-pointer rounded border-gray-300 text-[var(--color-ted-red)] focus:ring-[var(--color-ted-red)]" />
+                    ) : null}
+                    <div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h3 className="text-2xl font-bold tracking-tight text-gray-900">{sponsor.companyName || "—"}</h3>
+                        <div className="relative" ref={cardMenuFor?.kind === "sponsor" && cardMenuFor.id === sponsor.id ? cardMenuRef : undefined}>
+                          <button
+                            type="button"
+                            onClick={() => setCardMenuFor(cardMenuFor?.kind === "sponsor" && cardMenuFor.id === sponsor.id ? null : { kind: "sponsor", id: sponsor.id })}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-lg font-semibold text-gray-500 transition hover:border-[var(--color-ted-red)] hover:text-[var(--color-ted-red)]"
+                            aria-label="Editar solicitud"
+                          >
+                            ⋯
+                          </button>
+                          {cardMenuFor?.kind === "sponsor" && cardMenuFor.id === sponsor.id ? (
+                            <div className="absolute left-0 top-11 z-50 w-48 rounded-xl border border-gray-200 bg-white p-2 shadow-[0_14px_40px_rgba(0,0,0,0.15)]">
+                              <button type="button" onClick={() => openEdit("sponsor", sponsor)} className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+                                Editar solicitud
+                              </button>
+                            </div>
+                          ) : null}
+                        </div>
                       </div>
-                    </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm font-medium text-gray-600">
-                      <button type="button" onClick={() => copyEmail(sponsor.email)} className="underline underline-offset-2 hover:text-[var(--color-ted-red)]">
-                        {sponsor.email || "—"}
-                      </button>
-                      <span className="hidden text-gray-300 sm:inline">•</span>
-                      <span>{sponsor.phone || "—"}</span>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-sm font-medium text-gray-600">
+                        <button type="button" onClick={() => copyEmail(sponsor.email)} className="underline underline-offset-2 hover:text-[var(--color-ted-red)]">
+                          {sponsor.email || "—"}
+                        </button>
+                        <span className="hidden text-gray-300 sm:inline">•</span>
+                        <span>{sponsor.phone || "—"}</span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex flex-col items-start gap-2 md:items-end">
@@ -1597,6 +1694,7 @@ export default function AdminPage() {
             <div>
               <h2 className="text-2xl font-bold text-white">Solicitudes de voluntariado</h2>
               <div className="text-sm text-gray-400">Colección actual: <span className="font-mono text-[var(--color-ted-red)]">voluntariosTedx</span></div>
+              <div className="mt-1 text-xs text-gray-500">La papelera segura usa <span className="font-mono text-gray-300">{VOLUNTEER_TRASH_COLLECTION}</span>.</div>
             </div>
           </section>
 
@@ -1620,6 +1718,9 @@ export default function AdminPage() {
 
                 <div className="mb-5 flex flex-col gap-4 pl-4 md:flex-row md:items-start md:justify-between">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                    {selectionMode ? (
+                      <input type="checkbox" checked={selectedIds.includes(volunteer.id)} onChange={() => toggleSelect(volunteer.id)} className="mt-2 h-5 w-5 cursor-pointer rounded border-gray-300 text-[var(--color-ted-red)] focus:ring-[var(--color-ted-red)]" />
+                    ) : null}
                     <div className="w-full shrink-0 sm:w-[84px]">
                       {volunteer.photoUrl ? (
                         <button

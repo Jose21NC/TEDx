@@ -1,5 +1,5 @@
 import { onRequest } from "firebase-functions/v2/https";
-import { defineSecret, defineString } from "firebase-functions/params";
+import { defineString } from "firebase-functions/params";
 import { initializeApp } from "firebase-admin/app";
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -12,9 +12,9 @@ export {
 
 initializeApp();
 
-const resendApiKey = defineSecret("RESEND_API_KEY");
+const resendApiKey = defineString("RESEND_API_KEY");
 const resendFromEmail = defineString("RESEND_FROM_EMAIL");
-const mailchimpApiKey = defineSecret("MAILCHIMP_API_KEY");
+const mailchimpApiKey = defineString("MAILCHIMP_API_KEY");
 const mailchimpAudienceId = defineString("MAILCHIMP_AUDIENCE_ID");
 const mailchimpServerPrefix = defineString("MAILCHIMP_SERVER_PREFIX");
 
@@ -277,7 +277,7 @@ async function resendEmail(
   }
 }
 
-export const confirmacion = onRequest({ cors: true, secrets: [resendApiKey] }, async (request, response) => {
+export const confirmacion = onRequest({ cors: true, invoker: "public" }, async (request, response) => {
   if (request.method === "OPTIONS") {
     response.status(204).set(corsHeaders(request.headers.origin)).send("");
     return;
@@ -319,7 +319,7 @@ export const confirmacion = onRequest({ cors: true, secrets: [resendApiKey] }, a
   }
 });
 
-export const newsletter = onRequest({ cors: true, secrets: [mailchimpApiKey] }, async (request, response) => {
+export const newsletter = onRequest({ cors: true }, async (request, response) => {
   if (request.method === "OPTIONS") {
     response.status(204).set(corsHeaders(request.headers.origin)).send("");
     return;
@@ -370,7 +370,7 @@ export const newsletter = onRequest({ cors: true, secrets: [mailchimpApiKey] }, 
 });
 
 export const newsletterActualizacion = onRequest(
-  { cors: true, secrets: [mailchimpApiKey] },
+  { cors: true },
   async (request, response) => {
     if (request.method === "OPTIONS") {
       response.status(204).set(corsHeaders(request.headers.origin)).send("");

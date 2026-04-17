@@ -25,7 +25,7 @@ async function cropVolunteerImageSquare(
       img.src = src;
     });
 
-    const targetSize = 1200;
+    const targetSize = 800;
     const targetAspect = 1;
     const imageAspect = image.naturalWidth / image.naturalHeight;
 
@@ -71,8 +71,8 @@ async function cropVolunteerImageSquare(
           }
           resolve(result);
         },
-        "image/png",
-        0.95,
+        "image/jpeg",
+        0.85,
       );
     });
 
@@ -161,6 +161,7 @@ export default function VoluntariadoForm() {
   const [profileImageOffsetX, setProfileImageOffsetX] = useState(50);
   const [profileImageOffsetY, setProfileImageOffsetY] = useState(50);
   const [profileCropDragState, setProfileCropDragState] = useState<VolunteerCropState | null>(null);
+  const [isCropping, setIsCropping] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
   const [showMoreSkills, setShowMoreSkills] = useState(false);
@@ -304,6 +305,7 @@ export default function VoluntariadoForm() {
   async function confirmProfileCrop() {
     if (!profileImageFile) return;
 
+    setIsCropping(true);
     try {
       const cropped = await cropVolunteerImageSquare(profileImageFile, {
         zoom: profileImageZoom,
@@ -312,8 +314,10 @@ export default function VoluntariadoForm() {
       });
       setProfileImageCroppedBlob(cropped);
       setImageError("");
-    } catch {
-      setImageError("No se pudo recortar la imagen. Intenta con otra foto.");
+    } catch (e) {
+      setImageError(e instanceof Error ? e.message : "No se pudo recortar la imagen. Intenta con otra foto.");
+    } finally {
+      setIsCropping(false);
     }
   }
 
@@ -380,9 +384,9 @@ export default function VoluntariadoForm() {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "") || "voluntario";
-      const storageRef = storageModule.ref(storage, `volunteer-photos/${submissionId}/${Date.now()}_${safeName}.png`);
+      const storageRef = storageModule.ref(storage, `volunteer-photos/${submissionId}/${Date.now()}_${safeName}.jpg`);
 
-      await storageModule.uploadBytes(storageRef, croppedImageBlob, { contentType: "image/png" });
+      await storageModule.uploadBytes(storageRef, croppedImageBlob, { contentType: "image/jpeg" });
       const photoUrl = await storageModule.getDownloadURL(storageRef);
 
       await firestore.addDoc(collectionRef, {
@@ -509,9 +513,10 @@ export default function VoluntariadoForm() {
                 <button
                   type="button"
                   onClick={confirmProfileCrop}
-                  className="rounded-full bg-[var(--color-ted-red)] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#c90022]"
+                  disabled={isCropping}
+                  className="rounded-full bg-[var(--color-ted-red)] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#c90022] disabled:opacity-50"
                 >
-                  Confirmar recorte
+                  {isCropping ? "Procesando..." : "Confirmar recorte"}
                 </button>
               </div>
 

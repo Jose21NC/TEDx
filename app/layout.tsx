@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     description: "Ideas que vale la pena compartir desde Managua.",
     images: [
       {
-        url: "/media/SPEAKERS.png",
+        url: "/media/SPEAKERS_OG.jpg",
         width: 1200,
         height: 630,
         alt: "TEDx Avenida Bolivar - Convocatoria",
@@ -75,6 +75,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" data-scroll-behavior="smooth">
+      <head>
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ClientScripts />
         {children}

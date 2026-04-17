@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { AnimatePresence, motion, useInView } from "framer-motion";
 import { collection, onSnapshot } from "firebase/firestore";
 import { createPortal } from "react-dom";
 import { getClientDb } from "../../lib/firebaseClient";
@@ -78,6 +78,9 @@ export default function SpeakersShowcase() {
   const [speakers, setSpeakers] = useState<SpeakerCard[]>([]);
   const [scrollY, setScrollY] = useState(0);
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef, { once: true, margin: "200px" });
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -103,6 +106,7 @@ export default function SpeakersShowcase() {
   }, []);
 
   useEffect(() => {
+    if (!isInView) return;
     let alive = true;
 
     try {
@@ -116,7 +120,7 @@ export default function SpeakersShowcase() {
 
           const items = snapshot.docs
             .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as Omit<SpeakerRecord, "id">) }))
-            .filter((record) => normalizeStatus(record.status) === "Aprobada")
+            .filter((record) => normalizeStatus(record.status) === "Aprobada" && record.publicarEnWeb !== false)
             .sort((a, b) => {
               const ta = typeof a.createdAt === "object" && a.createdAt && "seconds" in a.createdAt ? a.createdAt.seconds ?? 0 : 0;
               const tb = typeof b.createdAt === "object" && b.createdAt && "seconds" in b.createdAt ? b.createdAt.seconds ?? 0 : 0;
@@ -146,7 +150,7 @@ export default function SpeakersShowcase() {
         alive = false;
       };
     }
-  }, []);
+  }, [isInView]);
 
   useEffect(() => {
     if (!selectedSpeaker) return;
@@ -175,7 +179,7 @@ export default function SpeakersShowcase() {
   );
 
   return (
-    <section aria-labelledby="speakers-heading" className="px-6 pb-16 md:px-10 md:pb-20">
+    <section ref={sectionRef} aria-labelledby="speakers-heading" className="px-6 pb-16 md:px-10 md:pb-20">
       <div className="mx-auto w-full max-w-[1450px]">
         <h2
           id="speakers-heading"

@@ -159,7 +159,7 @@ function BienvenidaContent() {
 
         {/* Logo TEDx White centrado y abajo */}
         <div className="w-48 mt-2">
-          <Image src={logoWhite} alt="TEDx Logo" width={500} height={160} className="w-full object-contain opacity-80 hover:opacity-100 transition-opacity" />
+          <Image src={logoWhite} alt="TEDx Logo" width={500} height={160} className="w-full object-contain opacity-80 hover:opacity-100 transition-opacity" priority />
         </div>
       </div>
     </div>

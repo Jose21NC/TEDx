@@ -40,21 +40,16 @@ body {
 }
 
 @keyframes tedx-cta-arc-float {
-  0% {
-    transform: translate(-50%, -50%) translateY(0) scale(1);
-  }
-  50% {
-    transform: translate(-50%, -50%) translateY(-12px) scale(1.02);
-  }
-  100% {
-    transform: translate(-50%, -50%) translateY(6px) scale(1.01);
-  }
+  0%, 100% { transform: translate(-50%, -50%) translateY(0) scale(1); }
+  50% { transform: translate(-50%, -50%) translateY(-12px) scale(1.015); }
 }
 
 .tedx-cta-arc {
-  animation: tedx-cta-arc-float 11s ease-in-out infinite;
+  transform: translate(-50%, -50%);
+  animation: tedx-cta-arc-float 14s ease-in-out infinite;
   filter: saturate(1.02);
 }
+
 
 .tedx-cta-link {
   transition: transform 180ms ease, letter-spacing 180ms ease, color 180ms ease;
@@ -131,7 +126,6 @@ body {
 }
 
 @media (max-width: 768px) {
-  .tedx-cta-arc,
   .float-soft,
   .float-soft-slower,
   .float-medium,

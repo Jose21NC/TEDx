@@ -9,6 +9,7 @@
     "start": "next start -p ${PORT:-3000}",
     "lint": "eslint",
     "migrate:firestore": "node scripts/firestore-migrate.js",
+    "deploy:ftp": "next build && node scripts/deploy.mjs",
     "deploy:functions:safe": "npx firebase-tools@13.32.0 deploy --only functions:confirmacion,functions:newsletter,functions:newsletterActualizacion",
     "deploy:functions:all:safe": "npx firebase-tools@13.32.0 deploy --only functions:confirmacion,functions:newsletter,functions:newsletterActualizacion,functions:generateCertificates,functions:mergeCertificatesPdf,functions:processVolunteerAttendanceCredits",
     "test:notifications:local": "node scripts/smoke-notifications.mjs"
@@ -35,6 +36,7 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "basic-ftp": "^5.3.0",
     "eslint": "^9.39.4",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4.2.2",

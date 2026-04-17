@@ -72,7 +72,7 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <main
         id="contenido-principal"
-        className="min-h-dvh flex flex-col bg-black text-white selection:bg-[var(--color-ted-red)] selection:text-white"
+        className="relative min-h-dvh flex flex-col bg-[#171314] text-white selection:bg-[var(--color-ted-red)] selection:text-white"
       >
       <ScrollAwareHeader />
 
@@ -112,7 +112,9 @@ export default function Home() {
             >
               <div className="float-medium relative min-h-[420px] overflow-hidden rounded-sm bg-transparent transition-transform duration-300 group-hover:scale-[1.01] md:min-h-[560px]">
                 <picture>
-                  <source media="(max-width: 768px)" srcSet="/media/speakers_nuevo_mobile.png" />
+                  <source media="(max-width: 768px)" srcSet="/media/speakers_nuevo_mobile.webp" type="image/webp" />
+                  <source media="(max-width: 768px)" srcSet="/media/speakers_nuevo_mobile.png" type="image/png" />
+                  <source srcSet="/media/speaker_nuevo.webp" type="image/webp" />
                   <img
                     src="/media/speaker_nuevo.png"
                     alt="Call for speakers TEDx Avenida Bolivar"
@@ -120,7 +122,7 @@ export default function Home() {
                     width="2048"
                     height="2048"
                     loading="eager"
-                    decoding="async"
+                    fetchPriority="high"
                   />
                 </picture>
               </div>

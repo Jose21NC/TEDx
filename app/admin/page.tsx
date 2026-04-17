@@ -438,7 +438,7 @@ export default function AdminPage() {
               recipientEmail,
               recipientName: getRecordName(targetRecord, currentPanel).trim(),
               source: currentPanel === "sponsors" ? "patrocinios" : currentPanel === "volunteers" ? "voluntariado" : "speakers",
-              applicationStatus: status,
+              applicationStatus: status === "Reserva" ? "En revisión" : status,
               trackingUrl: `${window.location.origin}/status?id=${id}`,
             });
           } catch (mailError) {
@@ -489,7 +489,7 @@ export default function AdminPage() {
             recipientEmail,
             recipientName,
             source,
-            applicationStatus: status,
+            applicationStatus: status === "Reserva" ? "En revisión" : status,
             trackingUrl,
           });
         } catch (mailError) {
@@ -629,7 +629,7 @@ export default function AdminPage() {
   function getBulkStatusOptions(panel = activePanel) {
     if (panel === "sponsors") return ["Pendiente", "En contacto", "Finalizado", "No aprobado"];
     if (panel === "volunteers") return ["Pendiente", "En revision", "Aprobado", "Rechazado"];
-    return ["Pendiente", "Aprobada", "Rechazada", "Reserva"];
+    return ["Pendiente", "Aprobada", "Rechazada", "En revisión"];
   }
 
   function getRecordName(record: any, panel = activePanel) {
@@ -646,6 +646,7 @@ export default function AdminPage() {
 
   function normalizeSpeakerStatus(value: string | undefined) {
     if (!value || value === "Sin revisar") return "Pendiente";
+    if (value === "Reserva" || value === "En revision") return "En revisión";
     return value;
   }
 
@@ -728,7 +729,7 @@ export default function AdminPage() {
     const status = normalizeSpeakerStatus(value);
     if (status === "Aprobada") return { label: "Aprobada", className: "border-green-300 bg-green-50 text-green-700", dot: "bg-green-500" };
     if (status === "Rechazada") return { label: "Rechazada", className: "border-red-300 bg-red-50 text-[var(--color-ted-red)]", dot: "bg-[var(--color-ted-red)]" };
-    if (status === "Reserva") return { label: "Reserva", className: "border-yellow-300 bg-yellow-50 text-yellow-700", dot: "bg-yellow-500" };
+    if (status === "En revisión" || status === "Reserva") return { label: "En revisión", className: "border-yellow-300 bg-yellow-50 text-yellow-700", dot: "bg-yellow-500" };
     return { label: "Pendiente", className: "border-gray-300 bg-gray-50 text-gray-600", dot: "bg-gray-400" };
   }
 
@@ -736,7 +737,7 @@ export default function AdminPage() {
     const status = normalizeSpeakerStatus(value);
     if (status === "Aprobada") return "#22c55e";
     if (status === "Rechazada") return "#eb0028";
-    if (status === "Reserva") return "#eab308";
+    if (status === "En revisión" || status === "Reserva") return "#eab308";
     return "#9ca3af";
   }
 
@@ -760,7 +761,7 @@ export default function AdminPage() {
     const status = normalizeVolunteerStatus(value);
     if (status === "Aprobado") return { label: "Aprobado", className: "border-emerald-300 bg-emerald-50 text-emerald-700", dot: "bg-emerald-500" };
     if (status === "Rechazado") return { label: "Rechazado", className: "border-red-300 bg-red-50 text-[var(--color-ted-red)]", dot: "bg-[var(--color-ted-red)]" };
-    if (status === "En revision") return { label: "En revision", className: "border-blue-300 bg-blue-50 text-blue-700", dot: "bg-blue-500" };
+    if (status === "En revision" || status === "En revisión") return { label: "En revisión", className: "border-yellow-300 bg-yellow-50 text-yellow-700", dot: "bg-yellow-500" };
     return { label: "Pendiente", className: "border-gray-300 bg-gray-50 text-gray-600", dot: "bg-gray-400" };
   }
 
@@ -768,7 +769,7 @@ export default function AdminPage() {
     const status = normalizeVolunteerStatus(value);
     if (status === "Aprobado") return "#10b981";
     if (status === "Rechazado") return "#eb0028";
-    if (status === "En revision") return "#3b82f6";
+    if (status === "En revision" || status === "En revisión") return "#eab308";
     return "#9ca3af";
   }
 
@@ -857,6 +858,7 @@ export default function AdminPage() {
       title: data.tituloCharla ?? "",
       centralIdea: data.idea ?? "",
       description: data.novedad ?? "",
+      publicarEnWeb: true,
     });
     setApprovalPhotoFile(null);
     setApprovalPhotoPreview("");
@@ -1039,6 +1041,7 @@ export default function AdminPage() {
         idea: String(approvalDraft.centralIdea).trim(),
         novedad: String(approvalDraft.description).trim(),
         status: "Aprobada",
+        publicarEnWeb: !!approvalDraft.publicarEnWeb,
       };
 
       await firestore.updateDoc(docRef, payload);
@@ -1168,7 +1171,7 @@ export default function AdminPage() {
         <div className="w-full max-w-sm bg-black border border-gray-800 p-8 rounded-2xl shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-[var(--color-ted-red)]"></div>
           <div className="flex justify-center mb-8 mt-2">
-            <Image src={logoWhite} alt="TEDx" className="h-10 w-auto" />
+            <Image src={logoWhite} alt="TEDx" className="h-10 w-auto" priority />
           </div>
           <p className="text-gray-400 text-xs font-mono text-center mb-8 uppercase tracking-widest">Portal de Revisores</p>
           <form 
@@ -1334,7 +1337,7 @@ export default function AdminPage() {
                     {getBulkStatusOptions().map((statusOption) => {
                       const isPositive = /aprobad|finalizado/i.test(statusOption);
                       const isDanger = /rechazad|no aprobado/i.test(statusOption);
-                      const isWarning = /reserva/i.test(statusOption);
+                      const isWarning = /reserva|revisi/i.test(statusOption);
                       const textClass = isPositive ? "text-green-400" : isDanger ? "text-[var(--color-ted-red)]" : isWarning ? "text-yellow-300" : "text-gray-300";
 
                       return (
@@ -1429,6 +1432,9 @@ export default function AdminPage() {
                           <button onClick={() => generatePDF(p)} disabled={processing} className="rounded bg-black px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-gray-800 disabled:opacity-50">
                             PDF + QR
                           </button>
+                          <Link href={`/status?id=${p.id}`} target="_blank" className="rounded border border-gray-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                            Ver Estatus ↗
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -1509,8 +1515,8 @@ export default function AdminPage() {
                             <button onClick={() => updateStatusForSingle(p.id, "Rechazada")} className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wider text-[var(--color-ted-red)] transition-colors hover:bg-red-50">
                               <span className="h-2.5 w-2.5 rounded-full bg-[var(--color-ted-red)] shadow-sm" /> Rechazada
                             </button>
-                            <button onClick={() => updateStatusForSingle(p.id, "Reserva")} className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wider text-yellow-700 transition-colors hover:bg-yellow-50">
-                              <span className="h-2.5 w-2.5 rounded-full bg-yellow-500 shadow-sm" /> Reserva
+                            <button onClick={() => updateStatusForSingle(p.id, "En revisión")} className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wider text-yellow-700 transition-colors hover:bg-yellow-50">
+                              <span className="h-2.5 w-2.5 rounded-full bg-yellow-500 shadow-sm" /> En revisión
                             </button>
                             <div className="mx-2 my-1 h-px bg-gray-100" />
                             <button onClick={() => updateStatusForSingle(p.id, "Pendiente")} className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wider text-gray-500 transition-colors hover:bg-gray-50">
@@ -1593,6 +1599,9 @@ export default function AdminPage() {
                       <button onClick={() => generateSponsorDoc(sponsor)} disabled={processing} className="rounded bg-black px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-gray-800 disabled:opacity-50">
                         PDF + QR
                       </button>
+                      <Link href={`/status?id=${sponsor.id}`} target="_blank" className="rounded border border-gray-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                        Ver Estatus ↗
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -1788,6 +1797,9 @@ export default function AdminPage() {
                   <div className="flex flex-col items-start gap-2 md:items-end">
                     <span className="w-fit rounded-sm border border-gray-200 bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-500">{formatDate(volunteer.createdAt)}</span>
                     <div className="font-mono text-[10px] text-gray-400" title={volunteer.id}>ID_{volunteer.id.substring(0, 8)}</div>
+                    <Link href={`/status?id=${volunteer.id}`} target="_blank" className="rounded border border-gray-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                      Ver Estatus ↗
+                    </Link>
                   </div>
                 </div>
 
@@ -2055,7 +2067,7 @@ export default function AdminPage() {
                         <option value="Pendiente">Pendiente</option>
                         <option value="Aprobada">Aprobada</option>
                         <option value="Rechazada">Rechazada</option>
-                        <option value="Reserva">Reserva</option>
+                        <option value="En revisión">En revisión</option>
                       </>
                     ) : (
                       <>
@@ -2128,9 +2140,9 @@ export default function AdminPage() {
         </div>
       ) : null}
 
-      {approvingSpeaker ? (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center overflow-hidden bg-black/80 px-4 py-6 backdrop-blur-sm sm:px-6 sm:py-10">
-          <div className="w-full max-w-5xl max-h-[calc(100dvh-3rem)] overflow-y-auto rounded-3xl border border-white/10 bg-white shadow-[0_30px_100px_rgba(0,0,0,0.45)] sm:max-h-[calc(100dvh-5rem)]">
+      {mounted && approvingSpeaker ? createPortal(
+        <div className="fixed inset-0 z-[95] bg-black/80 backdrop-blur-sm">
+          <div className="absolute left-1/2 top-1/2 w-[min(calc(100%-2rem),68rem)] max-h-[90dvh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl border border-white/10 bg-white shadow-[0_30px_100px_rgba(0,0,0,0.45)] sm:max-h-[84dvh]">
             <div className="flex items-center justify-between gap-4 border-b border-gray-200 bg-gray-50 px-6 py-4">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--color-ted-red)]">Confirmar antes de aprobar</p>
@@ -2222,10 +2234,32 @@ export default function AdminPage() {
                   />
                 </div>
 
-                {approvalError ? <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{approvalError}</div> : null}
+                {approvalError ? (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 animate-in fade-in slide-in-from-top-1 duration-200">
+                    {approvalError}
+                  </div>
+                ) : null}
 
                 <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
                   Se aprobará la ponencia usando estos datos y se actualizará el estado a <span className="font-semibold text-green-700">Aprobada</span>.
+                </div>
+
+                <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className="relative flex items-center">
+                      <input 
+                        type="checkbox" 
+                        checked={!!approvalDraft.publicarEnWeb}
+                        onChange={(e) => updateApprovalField("publicarEnWeb", e.target.checked)}
+                        className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 transition-all checked:bg-[var(--color-ted-red)] checked:border-[var(--color-ted-red)]"
+                      />
+                      <svg className="absolute h-3.5 w-3.5 text-white opacity-0 peer-checked:opacity-100 left-0.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-800">Publicar en la página web</p>
+                      <p className="text-[10px] text-gray-500 uppercase tracking-wider">Si se desmarca, el ponente será aprobado pero no aparecerá en el inicio.</p>
+                    </div>
+                  </label>
                 </div>
               </div>
             </div>
@@ -2239,7 +2273,8 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       ) : null}
 
       {mounted && approvingSponsor

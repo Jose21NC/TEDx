@@ -9,6 +9,7 @@ export default function ClientScripts() {
   const dotRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const posRef = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
+  const isAnimatingRef = useRef(false);
 
   useEffect(() => {
     document.documentElement.classList.remove("page-exit");
@@ -34,6 +35,34 @@ export default function ClientScripts() {
     let idleCallbackId: number | null = null;
     let idleTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
+    function update() {
+      const cur = cursorRef.current;
+      const d = dotRef.current;
+      if (!cur || !d) {
+        isAnimatingRef.current = false;
+        return;
+      }
+
+      const dx = posRef.current.x - posRef.current.tx;
+      const dy = posRef.current.y - posRef.current.ty;
+
+      if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
+        posRef.current.tx = posRef.current.x;
+        posRef.current.ty = posRef.current.y;
+        cur.style.transform = `translate(${posRef.current.tx}px, ${posRef.current.ty}px) translate(-50%, -50%) scale(1)`;
+        isAnimatingRef.current = false;
+        return;
+      }
+
+      // faster easing for a more responsive follower cursor
+      posRef.current.tx += dx * 0.45;
+      posRef.current.ty += dy * 0.45;
+      // position the follower with smoothing
+      cur.style.transform = `translate(${posRef.current.tx}px, ${posRef.current.ty}px) translate(-50%, -50%) scale(1)`;
+      // dot is moved directly in onMove for immediate response
+      rafRef.current = requestAnimationFrame(update);
+    }
+
     function setupCursor() {
       // create follower cursor and small dot at pointer
       const follower = document.createElement("div");
@@ -46,18 +75,7 @@ export default function ClientScripts() {
       document.body.appendChild(dot);
       dotRef.current = dot;
 
-      function update() {
-        const cur = cursorRef.current;
-        const d = dotRef.current;
-        if (!cur || !d) return;
-        // faster easing for a more responsive follower cursor
-        posRef.current.tx += (posRef.current.x - posRef.current.tx) * 0.45;
-        posRef.current.ty += (posRef.current.y - posRef.current.ty) * 0.45;
-        // position the follower with smoothing
-        cur.style.transform = `translate(${posRef.current.tx}px, ${posRef.current.ty}px) translate(-50%, -50%) scale(1)`;
-        // dot is moved directly in onMove for immediate response
-        rafRef.current = requestAnimationFrame(update);
-      }
+      isAnimatingRef.current = true;
       rafRef.current = requestAnimationFrame(update);
     }
 
@@ -70,6 +88,11 @@ export default function ClientScripts() {
         dotRef.current.style.opacity = "1";
       }
       if (cursorRef.current) cursorRef.current.style.opacity = "1";
+
+      if (!isAnimatingRef.current) {
+        isAnimatingRef.current = true;
+        rafRef.current = requestAnimationFrame(update);
+      }
     }
 
     function onEnterLink() {

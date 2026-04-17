@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { AnimatePresence, motion, useInView } from "framer-motion";
 import { collection, onSnapshot } from "firebase/firestore";
 import { createPortal } from "react-dom";
 import { getClientDb } from "../../lib/firebaseClient";
@@ -31,6 +31,8 @@ export default function TeamShowcase() {
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [scrollY, setScrollY] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef, { once: true, margin: "200px" });
 
   useEffect(() => {
     setIsMounted(true);
@@ -54,6 +56,7 @@ export default function TeamShowcase() {
   }, []);
 
   useEffect(() => {
+    if (!isInView) return;
     const db = getClientDb();
     const unsub = onSnapshot(collection(db, "websiteTeam"), (snap) => {
       const items = snap.docs.map((docSnap, index) => {
@@ -79,7 +82,7 @@ export default function TeamShowcase() {
       setLoading(false);
     });
     return unsub;
-  }, []);
+  }, [isInView]);
 
   useEffect(() => {
     if (!selectedMember) return;
@@ -94,7 +97,7 @@ export default function TeamShowcase() {
   }, [selectedMember]);
 
   return (
-    <section className="px-6 pb-24 lg:px-10">
+    <section ref={sectionRef} className="px-6 pb-24 lg:px-10">
       <div className="mx-auto w-full max-w-7xl">
         {loading ? (
           <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">

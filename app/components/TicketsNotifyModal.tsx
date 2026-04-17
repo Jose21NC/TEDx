@@ -84,7 +84,7 @@ export default function TicketsNotifyModal() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Tu mejor correo electrónico..."
+              placeholder="Tu correo electrónico..."
               className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-500 outline-none focus:border-[rgb(230,0,30)] focus:ring-1 focus:ring-[rgb(230,0,30)] transition-all text-lg"
             />
           </div>

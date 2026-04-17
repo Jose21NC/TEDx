@@ -84,7 +84,7 @@ export default function ScrollAwareHeader() {
           aria-label="Navegacion principal"
         >
           <Link href="#inicio" className="flex items-center">
-            <Image src={logoBlack} alt="TEDx Avenida Bolivar" className="h-14 w-auto sm:h-[4.5rem]" />
+            <Image src={logoBlack} alt="TEDx Avenida Bolivar" className="h-14 w-auto sm:h-[4.5rem]" priority unoptimized />
           </Link>
 
           <ul className="hidden items-center gap-6 text-base font-medium md:flex">
@@ -121,7 +121,7 @@ export default function ScrollAwareHeader() {
           <MobileNav
             hideOnDesktop={false}
             containerClassName=""
-            buttonClassName="rounded-full border border-white/40 bg-white/15 text-white shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-md hover:bg-white/25"
+            buttonClassName="rounded-full bg-transparent text-white hover:bg-white/10"
           />
         </motion.div>
       ) : null}

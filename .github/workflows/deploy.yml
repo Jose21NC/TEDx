@@ -1,0 +1,37 @@
+name: Deploy to FTP
+
+on:
+  push:
+    branches:
+      - main  # O la rama que uses para produccion
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+        env:
+          # Agrega aqui tus variables de entorno si son necesarias en el build
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./out/  # Cambia a .next/ si tu hosting soporta Node.js directamente, o out/ para sitios estaticos
+          server-dir: /public_html/ # Cambia por la ruta de tu servidor

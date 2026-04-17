@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useInView } from "framer-motion";
 import { collection, onSnapshot } from "firebase/firestore";
 import { getClientDb } from "../../lib/firebaseClient";
 
@@ -71,7 +72,11 @@ export default function SponsorsSection() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef, { once: true, margin: "200px" });
+
   useEffect(() => {
+    if (!isInView) return;
     let alive = true;
     let unsubTedx: () => void;
     let unsubWeb: () => void;
@@ -130,7 +135,7 @@ export default function SponsorsSection() {
       setLoading(false);
       return () => { alive = false; };
     }
-  }, []);
+  }, [isInView]);
 
   const combinedSponsors = [...webSponsors, ...sponsorsTedx];
   const usedLogos = new Set();
@@ -146,7 +151,7 @@ export default function SponsorsSection() {
   const supportingSponsors = allSponsors.filter((item) => item.sponsorLevel === "apoyo");
 
   return (
-    <section aria-labelledby="sponsors-heading" className="relative overflow-hidden bg-[#171314] px-6 py-20 md:px-10 md:py-24">
+    <section ref={sectionRef} aria-labelledby="sponsors-heading" className="relative overflow-hidden bg-[#171314] px-6 py-20 md:px-10 md:py-24">
       <div className="mx-auto w-full max-w-[1450px]">
         <h2
           id="sponsors-heading"

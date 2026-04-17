@@ -10,7 +10,7 @@ export default function AcercaPage() {
       <header className="border-b border-black/5 bg-white text-[#222] sticky top-0 z-20">
         <nav className="mx-auto flex w-full max-w-[88rem] items-center justify-between px-6 py-0.5">
           <Link href="/" className="flex items-center">
-            <Image src={logoBlack} alt="TEDx Avenida Bolivar" className="h-[4.5rem] w-auto" />
+            <Image src={logoBlack} alt="TEDx Avenida Bolivar" className="h-14 w-auto sm:h-[4.5rem]" priority unoptimized />
           </Link>
 
           <ul className="hidden items-center gap-6 text-sm font-medium md:flex">
@@ -38,26 +38,22 @@ export default function AcercaPage() {
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl text-center font-extrabold tracking-tight md:text-5xl">Acerca de</h1>
 
-          <div className="mt-10 space-y-5">
-            <h2 className="text-2xl font-bold tracking-tight">¿Qué es TEDx?</h2>
+          <div className="mt-14 space-y-6">
+            <h2 className="text-2xl font-bold tracking-tight">Acerca de TEDx Avenida Bolivar</h2>
             <p className="text-lg leading-8 text-gray-700 text-justify">
-              Con el objetivo de descubrir y difundir ideas, TED ha creado un programa llamado TEDx. TEDx
-              es un programa de eventos locales autoorganizados que reúne a personas para compartir una
-              experiencia similar a la de TED. Nuestro evento se llama TEDxAvenidaBolivar, donde x =
-              evento TED organizado de forma independiente. En nuestro evento TEDxAvenidaBolivar, las
-              charlas TED en video y las presentaciones en vivo se combinan para generar un debate
-              profundo y conectar en un grupo pequeño. La Conferencia TED proporciona una guía general
-              para el programa TEDx, pero cada evento TEDx, incluido el nuestro, se organiza de forma
-              independiente.
+              TEDxAvenida Bolivar es el escenario donde convergen la historia y el futuro de Managua. Bajo nuestro lema oficial, <span className="font-bold italic">"El Arte de Reinventar"</span>, buscamos explorar cómo la ciencia, el arte, la cultura y la educación se entrelazan para transformar los retos de nuestro entorno en soluciones brillantes. No buscamos solamente historias de vida, buscamos ideas revolucionarias y perspectivas únicas que demuestren cómo los nicaragüenses estamos reconstruyendo y modernizando nuestra sociedad con los recursos que tenemos. El mundo necesita escucharte.
             </p>
             <p className="text-lg leading-8 text-gray-700 text-justify">
-              Más información sobre el programa oficial TEDx:
+              Nuestro evento es uno de los únicos tres eventos TEDx autorizados actualmente en Nicaragua y se distingue por ser el único totalmente independiente, al no estar vinculado a ninguna universidad o colegio específico. Esta autonomía nos brinda la libertad de proyectar una perspectiva más amplia y diversa, permitiéndonos convocar a ponentes y asistentes de todos los rincones de Managua sin restricciones institucionales.
+            </p>
+            <p className="text-lg leading-8 text-gray-700">
+              Puedes encontrar más detalles sobre el evento en el sitio oficial de TED:
               <Link
-                href="https://www.ted.com/about/programs-initiatives/tedx-program"
+                href="https://www.ted.com/tedx/events/68788"
                 target="_blank"
                 className="ml-2 font-semibold text-[var(--color-ted-red)] underline underline-offset-4"
               >
-                ted.com/about/programs-initiatives/tedx-program
+                ted.com/tedx/events/68788
               </Link>
             </p>
           </div>
@@ -72,6 +68,16 @@ export default function AcercaPage() {
               donde x = evento TED organizado de forma independiente. La Conferencia TED proporciona una
               guía general para el programa TEDx, pero cada evento TEDx es autoorganizado. (Sujeto a
               ciertas normas y regulaciones).
+            </p>
+            <p className="text-lg leading-8 text-gray-700 text-justify">
+              Más información sobre el programa oficial TEDx:
+              <Link
+                href="https://www.ted.com/about/programs-initiatives/tedx-program"
+                target="_blank"
+                className="ml-2 font-semibold text-[var(--color-ted-red)] underline underline-offset-4"
+              >
+                ted.com/about/programs-initiatives/tedx-program
+              </Link>
             </p>
           </div>
 

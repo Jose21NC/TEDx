@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import logoBlack from "../media/logo-black.png";
 import { subscribeNewsletter } from "../../lib/notifications";
 
@@ -12,8 +13,8 @@ export default function SponsorsCtaSection() {
   const [feedback, setFeedback] = useState("");
   // Ajusta estas dos variables para mover el circulo rojo mas arriba o mas abajo.
   // Ejemplos: "68%", "72%", "60%".
-  const ARC_TOP_MOBILE = "72%";
-  const ARC_TOP_DESKTOP = "65%";
+  const ARC_TOP_MOBILE = "78%";
+  const ARC_TOP_DESKTOP = "82%";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,7 +39,7 @@ export default function SponsorsCtaSection() {
   return (
     <section
       aria-labelledby="cta-comunidad-heading"
-      className="relative overflow-hidden bg-[#151214] px-6 pb-8 pt-20 md:px-10 md:pb-10 md:pt-24"
+      className="relative overflow-hidden px-6 pb-8 pt-20 md:px-10 md:pb-10 md:pt-24"
       style={{
         ["--cta-arc-top" as any]: ARC_TOP_MOBILE,
         ["--cta-arc-top-md" as any]: ARC_TOP_DESKTOP,
@@ -46,8 +47,10 @@ export default function SponsorsCtaSection() {
     >
       <div
         aria-hidden="true"
-        className="tedx-cta-arc pointer-events-none absolute left-1/2 top-[var(--cta-arc-top)] h-[900px] w-[260vw] rounded-[50%] bg-[var(--color-ted-red)] md:top-[var(--cta-arc-top-md)] md:h-[1060px] md:w-[2200px]"
+        className="tedx-cta-arc pointer-events-none absolute left-1/2 top-[var(--cta-arc-top)] h-[1000px] w-[220vw] rounded-[50%] bg-[var(--color-ted-red)] md:top-[var(--cta-arc-top-md)] md:h-[1400px] md:w-[2400px]"
       />
+
+
 
       <div className="relative z-[1] mx-auto w-full max-w-[1450px]">
         <h2 id="cta-comunidad-heading" className="sr-only">
@@ -56,7 +59,7 @@ export default function SponsorsCtaSection() {
 
         <div className="grid gap-8 md:grid-cols-3 md:gap-10">
           <article className="border-t-2 border-white/70 pt-5 md:pt-6">
-            <h3 className="max-w-[16ch] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">
+            <h3 className="min-h-0 md:min-h-[160px] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">
               Tienes una idea que merece ser difundida y quieres ser speaker?
             </h3>
             <Link href="/convocatoria" className="group tedx-cta-link mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.14em] text-white md:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:focus-visible:ring-black/70">
@@ -65,7 +68,7 @@ export default function SponsorsCtaSection() {
           </article>
 
           <article className="border-t-2 border-white/70 pt-5 md:pt-6">
-            <h3 className="max-w-[16ch] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">
+            <h3 className="min-h-0 md:min-h-[160px] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">
               Quieres involucrarte y sumarte como voluntario TEDx?
             </h3>
             <Link
@@ -77,7 +80,7 @@ export default function SponsorsCtaSection() {
           </article>
 
           <article className="border-t-2 border-white/70 pt-5 md:pt-6">
-            <h3 className="max-w-[16ch] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">
+            <h3 className="min-h-0 md:min-h-[160px] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">
               Te interesa impulsar esta edicion como sponsor TEDx?
             </h3>
             <Link href="/patrocinios/solicitud" className="group tedx-cta-link mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.14em] text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/70">
@@ -103,19 +106,19 @@ export default function SponsorsCtaSection() {
                 required
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="Ingresa tu mejor correo..."
+                placeholder="Ingresa tu correo..."
                 className="w-full bg-transparent pl-5 pr-4 py-3 text-[15px] font-semibold text-black placeholder:text-gray-500 outline-none"
               />
-              <button 
-                type="submit" 
-                disabled={submitting} 
+              <button
+                type="submit"
+                disabled={submitting}
                 className="relative overflow-hidden group shrink-0 rounded-full bg-black px-8 py-3 text-sm font-bold tracking-widest uppercase text-white transition-all hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
               >
                 <span className="relative z-10">{submitting ? "Enviando" : "Suscribirme"}</span>
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
               </button>
             </div>
-            
+
             <div className="mt-4 flex items-center justify-between">
               <p aria-live="polite" className="min-h-6 text-sm font-bold text-black/80">
                 {feedback}
@@ -138,10 +141,10 @@ export default function SponsorsCtaSection() {
 
               <div className="mt-6 flex items-center gap-4 text-black">
                 <a href="https://www.linkedin.com/company/112654503/" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="transition hover:opacity-70">
-                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5A2.48 2.48 0 1 0 5 8.46 2.48 2.48 0 0 0 4.98 3.5ZM3 9h4v12H3V9Zm7 0h3.84v1.64h.05c.53-1 1.82-2.05 3.75-2.05C21 8.59 21 11.28 21 14.77V21h-4v-5.53c0-1.32-.03-3.02-1.84-3.02-1.85 0-2.13 1.44-2.13 2.93V21h-4V9Z"/></svg>
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5A2.48 2.48 0 1 0 5 8.46 2.48 2.48 0 0 0 4.98 3.5ZM3 9h4v12H3V9Zm7 0h3.84v1.64h.05c.53-1 1.82-2.05 3.75-2.05C21 8.59 21 11.28 21 14.77V21h-4v-5.53c0-1.32-.03-3.02-1.84-3.02-1.85 0-2.13 1.44-2.13 2.93V21h-4V9Z" /></svg>
                 </a>
                 <a href="https://instagram.com/tedxavenidabolivar" target="_blank" rel="noreferrer" aria-label="Instagram" className="transition hover:opacity-70">
-                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden="true"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.8A3.95 3.95 0 0 0 3.8 7.75v8.5a3.95 3.95 0 0 0 3.95 3.95h8.5a3.95 3.95 0 0 0 3.95-3.95v-8.5a3.95 3.95 0 0 0-3.95-3.95h-8.5Zm8.9 1.35a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z"/></svg>
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden="true"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.8A3.95 3.95 0 0 0 3.8 7.75v8.5a3.95 3.95 0 0 0 3.95 3.95h8.5a3.95 3.95 0 0 0 3.95-3.95v-8.5a3.95 3.95 0 0 0-3.95-3.95h-8.5Zm8.9 1.35a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z" /></svg>
                 </a>
               </div>
             </div>

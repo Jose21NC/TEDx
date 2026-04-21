@@ -45,9 +45,9 @@ export async function POST(req: NextRequest) {
       // Intento con el modelo 2.5
       result = await model.generateContent(prompt);
     } catch (apiError: any) {
-      if (apiError.status === 503 || apiError.message.includes("503")) {
-        console.warn("Gemini 2.5-flash alta demanda. Realizando fallback silencioso a 1.5-flash...");
-        const fallbackModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      if (apiError.status === 503 || apiError.message.includes("503") || apiError.status === 404 || apiError.message.includes("404")) {
+        console.warn("Gemini 2.5-flash no disponible o alta demanda. Realizando fallback silencioso a 2.5-flash-lite...");
+        const fallbackModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
         result = await fallbackModel.generateContent(prompt);
       } else {
         throw apiError;

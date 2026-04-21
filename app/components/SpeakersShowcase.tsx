@@ -16,6 +16,7 @@ type SpeakerRecord = {
   photoUrl?: string;
   fotoPerfil?: string;
   status?: string;
+  publicarEnWeb?: boolean;
   createdAt?: { seconds?: number } | string | number | null;
 };
 

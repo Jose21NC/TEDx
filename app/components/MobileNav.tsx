@@ -55,6 +55,9 @@ export default function MobileNav({
           <li>
             <Link href="/patrocinios" onClick={closeMenu} className="block rounded-md px-3 py-2.5 text-sm font-medium text-[#222] transition hover:bg-black/5">Patrocinadores</Link>
           </li>
+          <li>
+            <Link href="/voluntarios" onClick={closeMenu} className="block rounded-md px-3 py-2.5 text-sm font-medium text-[#222] transition hover:bg-black/5">Voluntarios</Link>
+          </li>
         </ul>
       </nav>
     </div>

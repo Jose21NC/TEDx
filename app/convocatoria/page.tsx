@@ -34,7 +34,7 @@ export default function ConvocatoriaPage() {
                   <h3 className="mt-4 text-base font-semibold text-[var(--color-ted-red)]">FECHAS CLAVE</h3>
                   <ul className="list-disc ml-6">
                     <li>Apertura de convocatoria: Martes 10 de marzo de 2026</li>
-                    <li>Fecha máxima de postulación: Lunes 25 de Mayo de 2026</li>
+                    <li>Fecha máxima de postulación: Lunes 10 de junio de 2026</li>
                     <li>Audición Presencial (Open Mic): Fecha por definir</li>
                   </ul>
 

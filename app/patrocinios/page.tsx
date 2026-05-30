@@ -110,6 +110,9 @@ export default function PatrociniosPage() {
             <li>
               <Link className="transition hover:text-[var(--color-ted-red)]" href="/patrocinios">Patrocinadores</Link>
             </li>
+            <li>
+              <Link className="transition hover:text-[var(--color-ted-red)]" href="/voluntarios">Voluntarios</Link>
+            </li>
           </ul>
           <MobileNav />
         </nav>

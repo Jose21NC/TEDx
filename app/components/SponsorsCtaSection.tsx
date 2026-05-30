@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import logoBlack from "../media/logo-black.png";
 import { subscribeNewsletter } from "../../lib/notifications";
+import { usePathname } from 'next/navigation';
 
 export default function SponsorsCtaSection() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,9 @@ export default function SponsorsCtaSection() {
   // Ejemplos: "68%", "72%", "60%".
   const ARC_TOP_MOBILE = "78%";
   const ARC_TOP_DESKTOP = "82%";
+
+  const pathname = usePathname();
+  const textColor = pathname === "/acerca/" ? "black" : "white";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -50,8 +54,6 @@ export default function SponsorsCtaSection() {
         className="tedx-cta-arc pointer-events-none absolute left-1/2 top-[var(--cta-arc-top)] h-[1000px] w-[220vw] rounded-[50%] bg-[var(--color-ted-red)] md:top-[var(--cta-arc-top-md)] md:h-[1400px] md:w-[2400px]"
       />
 
-
-
       <div className="relative z-[1] mx-auto w-full max-w-[1450px]">
         <h2 id="cta-comunidad-heading" className="sr-only">
           Conecta con TEDx Avenida Bolivar
@@ -59,28 +61,28 @@ export default function SponsorsCtaSection() {
 
         <div className="grid gap-8 md:grid-cols-3 md:gap-10">
           <article className="border-t-2 border-white/70 pt-5 md:pt-6">
-            <h3 className="min-h-0 md:min-h-[160px] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">
+            <h3 className="min-h-0 md:min-h-[160px] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em]" style={{color: textColor }}>
               Tienes una idea que merece ser difundida y quieres ser speaker?
             </h3>
-            <Link href="/convocatoria" className="group tedx-cta-link mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.14em] text-white md:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:focus-visible:ring-black/70">
+            <Link href="/convocatoria" className="group tedx-cta-link mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.14em] md:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:focus-visible:ring-black/70" style={{color: textColor }}>
               Convocatoria speakers <span aria-hidden="true" className="tedx-cta-link-arrow">{"->"}</span>
             </Link>
           </article>
 
           <article className="border-t-2 border-white/70 pt-5 md:pt-6">
-            <h3 className="min-h-0 md:min-h-[160px] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">
+            <h3 className="min-h-0 md:min-h-[160px] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em]" style={{color: textColor }}>
               Quieres involucrarte y sumarte como voluntario TEDx?
             </h3>
             <Link
               href="/voluntariado"
-              className="group tedx-cta-link mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.14em] text-white md:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:focus-visible:ring-black/70"
+              className="group tedx-cta-link mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.14em] md:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:focus-visible:ring-black/70" style={{color: textColor }}
             >
               Conviertete en voluntario <span aria-hidden="true" className="tedx-cta-link-arrow">{"->"}</span>
             </Link>
           </article>
 
           <article className="border-t-2 border-white/70 pt-5 md:pt-6">
-            <h3 className="min-h-0 md:min-h-[160px] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em] text-white">
+            <h3 className="min-h-0 md:min-h-[160px] text-[clamp(1.8rem,3.5vw,3.1rem)] font-black leading-[0.95] tracking-[-0.05em]" style={{color: textColor }}>
               Te interesa impulsar esta edicion como sponsor TEDx?
             </h3>
             <Link href="/patrocinios/solicitud" className="group tedx-cta-link mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.14em] text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/70">

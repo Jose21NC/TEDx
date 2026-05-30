@@ -32,6 +32,11 @@ export default function EquipoPage() {
                 Patrocinadores
               </Link>
             </li>
+            <li>
+              <Link className="transition hover:text-[rgb(230,0,30)]" href="/voluntarios">
+                Voluntarios
+              </Link>
+            </li>
           </ul>
           <MobileNav />
         </nav>

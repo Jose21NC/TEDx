@@ -29,6 +29,11 @@ export default function VoluntariadoPage() {
                 Patrocinadores
               </Link>
             </li>
+            <li>
+              <Link className="transition hover:text-[var(--color-ted-red)]" href="/voluntarios">
+                Voluntarios
+              </Link>
+            </li>
           </ul>
           <MobileNav />
         </nav>

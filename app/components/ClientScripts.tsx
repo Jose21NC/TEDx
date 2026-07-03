@@ -26,6 +26,11 @@ export default function ClientScripts() {
       Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
     const shouldUseTransitions = !reduceMotion && !saveData;
 
+    // Disable heavy custom cursor and animations on the admin panel to save resources
+    if (pathname && pathname.startsWith("/admin")) {
+      return;
+    }
+
     // only enable custom cursor on devices with fine pointer (mouse)
     if (typeof window !== "undefined") {
       const canUseCursor = window.matchMedia && window.matchMedia("(pointer: fine) and (hover: hover)").matches;
@@ -176,7 +181,7 @@ export default function ClientScripts() {
       if (cursorRef.current) cursorRef.current.remove();
       if (dotRef.current) dotRef.current.remove();
     };
-  }, []);
+  }, [pathname, router]);
 
   return null;
 }

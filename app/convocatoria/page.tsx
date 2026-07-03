@@ -74,9 +74,7 @@ export default function ConvocatoriaPage() {
                 <Image src={logoBlack} alt="TEDx UEES" className="h-20 w-auto" />
               </div>
 
-              <div className="flex-1">
-                <ClientFormWrapper />
-              </div>
+              <ClientFormWrapper />
             </div>
           </div>
         </div>

@@ -158,6 +158,10 @@ export default function AdminPage() {
   const [approvalError, setApprovalError] = useState<string>("");
   const [sponsorApprovalError, setSponsorApprovalError] = useState<string>("");
   const [editSaving, setEditSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [speakersLimit, setSpeakersLimit] = useState(15);
+  const [sponsorsLimit, setSponsorsLimit] = useState(15);
+  const [volunteersLimit, setVolunteersLimit] = useState(15);
   const [approvalSaving, setApprovalSaving] = useState(false);
   const [sponsorApprovalSaving, setSponsorApprovalSaving] = useState(false);
   const [newsletterSubject, setNewsletterSubject] = useState("");
@@ -1221,6 +1225,15 @@ export default function AdminPage() {
     );
   }
 
+  const filteredPosts = posts.filter(p => !searchQuery || (p.nombre && p.nombre.toLowerCase().includes(searchQuery.toLowerCase())) || (p.correo && p.correo.toLowerCase().includes(searchQuery.toLowerCase())));
+  const visiblePosts = filteredPosts.slice(0, speakersLimit);
+
+  const filteredSponsors = sponsors.filter(p => !searchQuery || (p.companyName && p.companyName.toLowerCase().includes(searchQuery.toLowerCase())) || (p.email && p.email.toLowerCase().includes(searchQuery.toLowerCase())));
+  const visibleSponsors = filteredSponsors.slice(0, sponsorsLimit);
+
+  const filteredVolunteers = volunteers.filter(p => !searchQuery || (p.fullName && p.fullName.toLowerCase().includes(searchQuery.toLowerCase())) || (p.email && p.email.toLowerCase().includes(searchQuery.toLowerCase())));
+  const visibleVolunteers = filteredVolunteers.slice(0, volunteersLimit);
+
   return (
     <main className="min-h-dvh flex flex-col overflow-x-hidden bg-[radial-gradient(circle_at_top,rgba(235,0,40,0.18),transparent_35%),linear-gradient(180deg,#111827_0%,#050505_100%)] text-white selection:bg-[var(--color-ted-red)] selection:text-white animate-page-fade">
       <header className="border-b border-black/5 bg-black text-[#222] sticky top-0 z-20 shadow-md">
@@ -1296,6 +1309,11 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+          {activePanel !== "page" && (
+            <div className="mt-6 flex items-center">
+              <input type="text" placeholder="Buscar por nombre, correo o empresa..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full rounded-full border border-white/20 bg-black/50 px-5 py-2.5 text-sm text-white placeholder-gray-400 outline-none focus:border-[var(--color-ted-red)] transition shadow-inner" />
+            </div>
+          )}
         </header>
 
         <div className="mb-8 grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.2)] backdrop-blur-sm md:grid-cols-[1fr_auto] md:items-center">
@@ -1364,7 +1382,8 @@ export default function AdminPage() {
           </div>
         </section>
 
-        <div className={activePanel === "speakers" ? "block" : "hidden"}>
+        {activePanel === "speakers" && (
+        <div className="block">
           <section className="mb-6 flex items-end justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-white">Solicitudes de postulación</h2>
@@ -1383,8 +1402,8 @@ export default function AdminPage() {
           ) : null}
 
           <section className="grid gap-6">
-            {posts.map((p) => (
-              <article key={p.id} className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 text-black shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl">
+            {visiblePosts.map((p) => (
+              <article key={p.id} className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 text-black shadow-sm">
                 <div className="absolute left-0 top-0 h-full w-2" style={{ backgroundColor: speakerStatusColor(p.status) }} />
                 <div className="flex items-start gap-4 pl-4">
                   {selectionMode ? (
@@ -1531,9 +1550,16 @@ export default function AdminPage() {
               </article>
             ))}
           </section>
+          {filteredPosts.length > speakersLimit && (
+            <div className="mt-6 mb-8 flex justify-center">
+               <button onClick={() => setSpeakersLimit(l => l + 15)} className="rounded-full border border-[var(--color-ted-red)] px-8 py-2.5 text-sm font-semibold text-[var(--color-ted-red)] transition hover:bg-[var(--color-ted-red)] hover:text-white">Cargar más ponentes ({speakersLimit} de {filteredPosts.length})</button>
+            </div>
+          )}
         </div>
+        )}
 
-        <div className={activePanel === "sponsors" ? "block" : "hidden"}>
+        {activePanel === "sponsors" && (
+        <div className="block">
           <WebsiteSponsorsManager />
 
           <section className="mb-6 mt-12 flex items-end justify-between gap-4">
@@ -1554,8 +1580,8 @@ export default function AdminPage() {
           ) : null}
 
           <section className="grid gap-6">
-            {sponsors.map((sponsor) => (
-              <article key={sponsor.id} className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 text-black shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl">
+            {visibleSponsors.map((sponsor) => (
+              <article key={sponsor.id} className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 text-black shadow-sm">
                 <div className="absolute left-0 top-0 h-full w-2" style={{ backgroundColor: sponsorStatusColor(sponsor.status) }} />
                 <div className="mb-4 flex flex-col gap-3 pl-4 md:flex-row md:items-start md:justify-between">
                   <div className="flex items-start gap-3">
@@ -1708,9 +1734,16 @@ export default function AdminPage() {
               </article>
             ))}
           </section>
+          {filteredSponsors.length > sponsorsLimit && (
+            <div className="mt-6 mb-8 flex justify-center">
+               <button onClick={() => setSponsorsLimit(l => l + 15)} className="rounded-full border border-[var(--color-ted-red)] px-8 py-2.5 text-sm font-semibold text-[var(--color-ted-red)] transition hover:bg-[var(--color-ted-red)] hover:text-white">Cargar más sponsors ({sponsorsLimit} de {filteredSponsors.length})</button>
+            </div>
+          )}
         </div>
+        )}
 
-        <div className={activePanel === "volunteers" ? "block" : "hidden"}>
+        {activePanel === "volunteers" && (
+        <div className="block">
           <section className="mb-6 flex items-end justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-white">Solicitudes de voluntariado</h2>
@@ -1730,11 +1763,11 @@ export default function AdminPage() {
           ) : null}
 
           <section className="grid gap-6">
-            {volunteers.map((volunteer) => {
+            {visibleVolunteers.map((volunteer) => {
               const isVolunteerExpanded = !!expandedVolunteerCards[volunteer.id];
 
               return (
-              <article key={volunteer.id} className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 text-black shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl sm:p-6">
+              <article key={volunteer.id} className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 text-black shadow-sm sm:p-6">
                 <div className="absolute left-0 top-0 h-full w-2" style={{ backgroundColor: volunteerStatusColor(volunteer.status) }} />
 
                 <div className="mb-5 flex flex-col gap-4 pl-4 md:flex-row md:items-start md:justify-between">
@@ -1926,11 +1959,18 @@ export default function AdminPage() {
                 </div>
               </article>
             );})}
+            {filteredVolunteers.length > volunteersLimit && (
+              <div className="mt-6 mb-8 flex justify-center col-span-full">
+                 <button onClick={() => setVolunteersLimit(l => l + 15)} className="rounded-full border border-[var(--color-ted-red)] px-8 py-2.5 text-sm font-semibold text-[var(--color-ted-red)] transition hover:bg-[var(--color-ted-red)] hover:text-white">Cargar más voluntarios ({volunteersLimit} de {filteredVolunteers.length})</button>
+              </div>
+            )}
             <WebsiteTeamManager />
           </section>
         </div>
+        )}
 
-        <div className={activePanel === "page" ? "block" : "hidden"}>
+        {activePanel === "page" && (
+        <div className="block">
           <section className="space-y-8 rounded-2xl border border-white/10 bg-white/5 p-10 text-white shadow-[0_25px_80px_rgba(0,0,0,0.3)] backdrop-blur-md">
             <div className="flex items-start justify-between">
               <div>
@@ -2022,10 +2062,11 @@ export default function AdminPage() {
             </div>
           </section>
         </div>
+        )}
 
       </div>
 
-      {editingRecord ? (
+      {mounted && editingRecord ? createPortal(
         <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden bg-black/80 px-4 py-6 backdrop-blur-sm sm:px-6 sm:py-10">
           <div className="w-full max-w-4xl max-h-[calc(100dvh-3rem)] overflow-y-auto rounded-3xl border border-white/10 bg-white shadow-[0_30px_100px_rgba(0,0,0,0.45)] sm:max-h-[calc(100dvh-5rem)]">
             <div className="flex items-center justify-between gap-4 border-b border-gray-200 bg-gray-50 px-6 py-4">
@@ -2138,7 +2179,7 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
-      ) : null}
+      , document.body) : null}
 
       {mounted && approvingSpeaker ? createPortal(
         <div className="fixed inset-0 z-[95] bg-black/80 backdrop-blur-sm">

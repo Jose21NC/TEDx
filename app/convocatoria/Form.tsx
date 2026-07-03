@@ -66,8 +66,16 @@ export default function ConvocatoriaForm() {
     else if (porQue.trim().split(/\s+/).length > 100) newErrors.porQue = "Máximo 100 palabras.";
     if (!novedad.trim()) newErrors.novedad = "Este campo es obligatorio.";
     else if (novedad.trim().split(/\s+/).length > 100) newErrors.novedad = "Máximo 100 palabras.";
-    if (!videoLink.trim() && !videoFile) newErrors.videoInfo = "Debes proporcionar un enlace o subir un video.";
-    else if (videoFile && videoFile.size > 150 * 1024 * 1024) newErrors.videoFile = "El video no debe superar 150MB.";
+    if (!videoLink.trim() && !videoFile) {
+      newErrors.videoInfo = "Debes proporcionar un enlace o subir un video.";
+    } else if (videoLink.trim()) {
+      const val = videoLink.trim();
+      const urlRegex = /^(https?:\/\/)[^\s]+$/i;
+      if (!urlRegex.test(val) || val.includes(" ")) {
+        newErrors.videoInfo = "Por favor, ingresa únicamente un enlace válido (sin texto adicional ni espacios).";
+      }
+    }
+    if (videoFile && videoFile.size > 150 * 1024 * 1024) newErrors.videoFile = "El video no debe superar 150MB.";
     if (!confirmaReglas) newErrors.confirmaReglas = "Debes confirmar el cumplimiento de las reglas TEDx.";
     if (!confirmaPrivacidad) newErrors.confirmaPrivacidad = "Debes aceptar el Aviso de Privacidad.";
 

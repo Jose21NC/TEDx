@@ -33,9 +33,9 @@ export default function ConvocatoriaPage() {
 
                   <h3 className="mt-4 text-base font-semibold text-[var(--color-ted-red)]">FECHAS CLAVE</h3>
                   <ul className="list-disc ml-6">
-                    <li>Apertura de convocatoria: Martes 10 de marzo de 2026</li>
-                    <li>Fecha máxima de postulación: Lunes 10 de junio de 2026</li>
-                    <li>Audición Presencial (Open Mic): Fecha por definir</li>
+                    <li>Apertura de convocatoria: Jueves 2 de julio de 2026</li>
+                    <li>Fecha máxima de postulación: Martes 7 de julio de 2026</li>
+                    <li>Fase de Entrevistas: Fechas por definir</li>
                   </ul>
 
                   <h3 className="mt-4 text-base font-semibold text-[var(--color-ted-red)]">BASES DE LA POSTULACIÓN</h3>
@@ -54,9 +54,9 @@ export default function ConvocatoriaPage() {
 
                   <h3 className="mt-4 text-base font-semibold text-[var(--color-ted-red)]">EL PROCESO DE SELECCIÓN</h3>
                   <ul className="list-disc ml-6">
-                    <li>Si tu idea queda preseleccionada, te contactaremos por correo electrónico para invitarte al OPEN MIC presencial que se llevará a cabo en Managua. No se admitirán presentaciones de manera remota.</li>
-                    <li>En el Open Mic, tendrás exactamente 3 minutos para presentar tu idea en vivo frente a nuestro equipo curador.</li>
-                    <li>De este grupo, seleccionaremos a los speakers oficiales que se subirán al escenario de TEDxAvenida Bolivar.</li>
+                    <li>Si tu propuesta de idea es preseleccionada, te contactaremos por correo electrónico para coordinar una entrevista personalizada.</li>
+                    <li>Esta entrevista nos permitirá profundizar en tu propuesta, conocer tu perfil como ponente y explorar el potencial de tu charla.</li>
+                    <li>A partir de estas entrevistas, seleccionaremos a los speakers oficiales que se subirán al escenario de TEDxAvenida Bolivar.</li>
                   </ul>
 
                   <p className="mt-4 font-semibold">¿Tienes una idea que vale la pena compartir? ¡Postula aquí!</p>

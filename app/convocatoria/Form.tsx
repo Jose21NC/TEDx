@@ -375,7 +375,7 @@ export default function ConvocatoriaForm() {
 
         <label className="inline-flex items-start gap-2">
           <input type="checkbox" checked={confirmaReglas} onChange={e => setConfirmaReglas(e.target.checked)} className="mt-1" />
-          <span className="text-sm text-justify">Confirmo que mi propuesta cumple estrictamente con los lineamientos de TED (no promueve agendas políticas, religiosas, comerciales ni pseudocientíficas) y que, de ser preseleccionado/a, tengo total disponibilidad para asistir presencialmente al Open Mic el sábado 18 de abril de 2026 en Managua. *</span>
+          <span className="text-sm text-justify">Confirmo que mi propuesta cumple estrictamente con los lineamientos de TED (no promueve agendas políticas, religiosas, comerciales ni pseudocientíficas) y que, de ser preseleccionado/a, tengo total disponibilidad para participar en el proceso de entrevistas y la preparación de la charla. *</span>
         </label>
         {errors.confirmaReglas && <p className="mt-1 text-sm text-red-600">{errors.confirmaReglas}</p>}
 

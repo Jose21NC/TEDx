@@ -2044,6 +2044,11 @@ export default function AdminPage() {
                     <div>
                       <h3 className="text-xl font-black text-white tracking-tight">{ticket.nombre}</h3>
                       <p className="text-sm text-gray-400 font-mono mt-1 font-medium">{ticket.correo}</p>
+                      {(ticket.cargo || ticket.edad) && (
+                        <p className="text-xs text-gray-300 mt-1 font-medium font-sans">
+                          {ticket.cargo ? ticket.cargo : "Sin cargo"} {ticket.edad ? `• ${ticket.edad} años` : ""}
+                        </p>
+                      )}
                     </div>
                     <div className="text-left sm:text-right flex flex-col sm:items-end gap-1 shrink-0">
                       <p className="text-sm font-bold text-white/90">Teléfono: <span className="font-mono font-medium">{ticket.telefono}</span></p>

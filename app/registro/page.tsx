@@ -8,17 +8,21 @@ import MobileNav from "../components/MobileNav";
 import { motion } from "framer-motion";
 import { getClientDb } from "../../lib/firebaseClient";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { subscribeNewsletter } from "../../lib/notifications";
 
 export default function RegistroPage() {
   const [mounted, setMounted] = useState(false);
   const [nombre, setNombre] = useState("");
   const [correo, setCorreo] = useState("");
   const [telefono, setTelefono] = useState("");
-  const [motivo, setMotivo] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [edad, setEdad] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const [motivo, setMotivo] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -43,6 +47,9 @@ export default function RegistroPage() {
         newErrors.telefono = "Ingresa un número telefónico válido (mínimo 8 dígitos).";
       }
     }
+    if (!edad.trim()) newErrors.edad = "La edad es obligatoria.";
+    else if (!/^\d+$/.test(edad.trim())) newErrors.edad = "La edad debe ser un número entero.";
+    if (!cargo.trim()) newErrors.cargo = "El cargo o profesión es obligatorio.";
     if (!motivo.trim()) newErrors.motivo = "Por favor dinos por qué te gustaría asistir.";
     else if (motivo.trim().split(/\s+/).length > 100) {
       newErrors.motivo = "El motivo debe tener un máximo de 100 palabras.";
@@ -60,15 +67,25 @@ export default function RegistroPage() {
         nombre: nombre.trim(),
         correo: correo.trim(),
         telefono: telefono.trim(),
+        cargo: cargo.trim(),
+        edad: Number(edad.trim()),
         motivo: motivo.trim(),
         createdAt: serverTimestamp(),
         createdAtIso: new Date().toISOString()
       });
 
+      try {
+        await subscribeNewsletter(correo.trim());
+      } catch (newsletterErr) {
+        console.error("Error subscribing to newsletter:", newsletterErr);
+      }
+
       setShowSuccessModal(true);
       setNombre("");
       setCorreo("");
       setTelefono("");
+      setCargo("");
+      setEdad("");
       setMotivo("");
     } catch (err: any) {
       console.error("Error saving pre-registration:", err);
@@ -220,6 +237,37 @@ export default function RegistroPage() {
                       placeholder="8888-8888"
                     />
                     {errors.telefono && <p className="mt-1 text-xs text-red-600 font-medium">{errors.telefono}</p>}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700">Edad *</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={edad}
+                      onChange={(e) => setEdad(e.target.value)}
+                      className={`mt-1 block w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-[var(--color-ted-red)]/20 ${
+                        errors.edad ? "border-red-600 focus:border-red-600" : "border-gray-300 focus:border-[var(--color-ted-red)]"
+                      }`}
+                      placeholder="Ej. 25"
+                    />
+                    {errors.edad && <p className="mt-1 text-xs text-red-600 font-medium">{errors.edad}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700">Cargo o Profesión *</label>
+                    <input
+                      type="text"
+                      value={cargo}
+                      onChange={(e) => setCargo(e.target.value)}
+                      className={`mt-1 block w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-[var(--color-ted-red)]/20 ${
+                        errors.cargo ? "border-red-600 focus:border-red-600" : "border-gray-300 focus:border-[var(--color-ted-red)]"
+                      }`}
+                      placeholder="Ej. Estudiante / Diseñador"
+                    />
+                    {errors.cargo && <p className="mt-1 text-xs text-red-600 font-medium">{errors.cargo}</p>}
                   </div>
                 </div>
 

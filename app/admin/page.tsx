@@ -112,13 +112,16 @@ export default function AdminPage() {
   const [posts, setPosts] = useState<Array<any>>([]);
   const [sponsors, setSponsors] = useState<Array<any>>([]);
   const [volunteers, setVolunteers] = useState<Array<any>>([]);
-  const [activePanel, setActivePanel] = useState<"speakers" | "sponsors" | "volunteers" | "page">("speakers");
+  const [tickets, setTickets] = useState<Array<any>>([]);
+  const [activePanel, setActivePanel] = useState<"speakers" | "sponsors" | "volunteers" | "page" | "tickets">("speakers");
   const [loading, setLoading] = useState(true);
   const [sponsorsLoading, setSponsorsLoading] = useState(true);
   const [volunteersLoading, setVolunteersLoading] = useState(true);
+  const [ticketsLoading, setTicketsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sponsorsError, setSponsorsError] = useState<string | null>(null);
   const [volunteersError, setVolunteersError] = useState<string | null>(null);
+  const [ticketsError, setTicketsError] = useState<string | null>(null);
   const [volunteerPhotoSavingId, setVolunteerPhotoSavingId] = useState<string | null>(null);
   const [volunteerPhotoError, setVolunteerPhotoError] = useState<string>("");
   const [copyNotice, setCopyNotice] = useState("");
@@ -162,6 +165,7 @@ export default function AdminPage() {
   const [speakersLimit, setSpeakersLimit] = useState(15);
   const [sponsorsLimit, setSponsorsLimit] = useState(15);
   const [volunteersLimit, setVolunteersLimit] = useState(15);
+  const [ticketsLimit, setTicketsLimit] = useState(15);
   const [approvalSaving, setApprovalSaving] = useState(false);
   const [sponsorApprovalSaving, setSponsorApprovalSaving] = useState(false);
   const [newsletterSubject, setNewsletterSubject] = useState("");
@@ -324,6 +328,35 @@ export default function AdminPage() {
     }
 
     fetchVolunteers();
+    return () => { mounted = false };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    async function fetchTickets() {
+      try {
+        const firebaseModule = await import("../../lib/firebaseClient");
+        const firestore = await import("firebase/firestore");
+        const db = firebaseModule.getClientDb();
+        const col = firestore.collection(db, "preregistrosEntradas");
+        const snap = await firestore.getDocs(col);
+        if (!mounted) return;
+        const items: Array<any> = [];
+        snap.forEach(doc => items.push({ ...doc.data(), id: doc.id }));
+        items.sort((a, b) => {
+          const ta = a.createdAt?.seconds ?? (a.createdAtIso ? new Date(a.createdAtIso).getTime() / 1000 : 0);
+          const tb = b.createdAt?.seconds ?? (b.createdAtIso ? new Date(b.createdAtIso).getTime() / 1000 : 0);
+          return tb - ta;
+        });
+        setTickets(items);
+      } catch (err: any) {
+        setTicketsError(err.message || String(err));
+      } finally {
+        setTicketsLoading(false);
+      }
+    }
+
+    fetchTickets();
     return () => { mounted = false };
   }, []);
 
@@ -609,12 +642,14 @@ export default function AdminPage() {
   function getPanelRecords(panel = activePanel) {
     if (panel === "sponsors") return sponsors;
     if (panel === "volunteers") return volunteers;
+    if (panel === "tickets") return tickets;
     return posts;
   }
 
   function getPanelCollectionName(panel = activePanel) {
     if (panel === "sponsors") return "sponsorsTedx";
     if (panel === "volunteers") return "voluntariosTedx";
+    if (panel === "tickets") return "preregistrosEntradas";
     return "ponentesTedx";
   }
 
@@ -639,12 +674,14 @@ export default function AdminPage() {
   function getRecordName(record: any, panel = activePanel) {
     if (panel === "sponsors") return record?.contactName ?? record?.companyName ?? "Participante";
     if (panel === "volunteers") return record?.fullName ?? "Participante";
+    if (panel === "tickets") return record?.nombre ?? "Participante";
     return record?.nombre ?? "Participante";
   }
 
   function getRecordEmail(record: any, panel = activePanel) {
     if (panel === "sponsors") return record?.email?.trim();
     if (panel === "volunteers") return record?.email?.trim();
+    if (panel === "tickets") return record?.correo?.trim();
     return record?.correo?.trim();
   }
 
@@ -1234,6 +1271,9 @@ export default function AdminPage() {
   const filteredVolunteers = volunteers.filter(p => !searchQuery || (p.fullName && p.fullName.toLowerCase().includes(searchQuery.toLowerCase())) || (p.email && p.email.toLowerCase().includes(searchQuery.toLowerCase())));
   const visibleVolunteers = filteredVolunteers.slice(0, volunteersLimit);
 
+  const filteredTickets = tickets.filter(p => !searchQuery || (p.nombre && p.nombre.toLowerCase().includes(searchQuery.toLowerCase())) || (p.correo && p.correo.toLowerCase().includes(searchQuery.toLowerCase())));
+  const visibleTickets = filteredTickets.slice(0, ticketsLimit);
+
   return (
     <main className="min-h-dvh flex flex-col overflow-x-hidden bg-[radial-gradient(circle_at_top,rgba(235,0,40,0.18),transparent_35%),linear-gradient(180deg,#111827_0%,#050505_100%)] text-white selection:bg-[var(--color-ted-red)] selection:text-white animate-page-fade">
       <header className="border-b border-black/5 bg-black text-[#222] sticky top-0 z-20 shadow-md">
@@ -1305,6 +1345,13 @@ export default function AdminPage() {
                 className={`min-w-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:flex-1 sm:px-5 ${activePanel === "page" ? "bg-[var(--color-ted-red)] text-white shadow-lg" : "text-gray-300 hover:text-white"}`}
               >
                 Pagina
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivePanel("tickets")}
+                className={`min-w-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:flex-1 sm:px-5 ${activePanel === "tickets" ? "bg-[var(--color-ted-red)] text-white shadow-lg" : "text-gray-300 hover:text-white"}`}
+              >
+                Entradas
               </button>
               </div>
             </div>
@@ -1965,6 +2012,58 @@ export default function AdminPage() {
               </div>
             )}
             <WebsiteTeamManager />
+          </section>
+        </div>
+        )}
+
+        {activePanel === "tickets" && (
+        <div className="block">
+          <section className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-white">Pre-registros de entradas</h2>
+              <div className="text-sm text-gray-400 font-medium">Colección actual: <span className="font-mono text-[var(--color-ted-red)]">preregistrosEntradas</span></div>
+            </div>
+          </section>
+
+          {ticketsLoading && <p className="py-8 text-center text-lg font-mono tracking-wider animate-pulse text-gray-400">CARGANDO REGISTROS...</p>}
+          {ticketsError && <p className="rounded border border-[var(--color-ted-red)] bg-black/50 p-4 font-medium text-[var(--color-ted-red)] shadow-lg font-sans">Error de conexión: {ticketsError}</p>}
+
+          {!ticketsLoading && !ticketsError && tickets.length === 0 ? (
+            <div className="rounded-lg border border-gray-800 bg-black/40 py-20 text-center shadow-inner">
+              <p className="font-mono text-lg text-gray-500">No se han recibido pre-registros de entradas</p>
+            </div>
+          ) : null}
+
+          <section className="grid gap-6">
+            {visibleTickets.map((ticket) => (
+              <article key={ticket.id} className="relative overflow-hidden rounded-2xl border border-gray-850 bg-[#0f0e0f]/80 p-5 text-white shadow-lg backdrop-blur-sm sm:p-6 transition hover:border-gray-700">
+                <div className="absolute left-0 top-0 h-full w-1.5 bg-[var(--color-ted-red)]" />
+
+                <div className="pl-2">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div>
+                      <h3 className="text-xl font-black text-white tracking-tight">{ticket.nombre}</h3>
+                      <p className="text-sm text-gray-400 font-mono mt-1 font-medium">{ticket.correo}</p>
+                    </div>
+                    <div className="text-left sm:text-right flex flex-col sm:items-end gap-1 shrink-0">
+                      <p className="text-sm font-bold text-white/90">Teléfono: <span className="font-mono font-medium">{ticket.telefono}</span></p>
+                      <p className="text-[11px] text-gray-500 font-medium font-sans">Registrado el: {ticket.createdAtIso ? new Date(ticket.createdAtIso).toLocaleString('es-NI') : (ticket.createdAt ? new Date(ticket.createdAt.seconds * 1000).toLocaleString('es-NI') : 'Fecha desconocida')}</p>
+                    </div>
+                  </div>
+                  {ticket.motivo && (
+                    <div className="mt-5 border-t border-white/5 pt-4">
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-[var(--color-ted-red)] mb-2">Motivo de Asistencia</h4>
+                      <p className="text-sm text-gray-300 bg-white/[0.02] border border-white/5 p-4 rounded-xl leading-relaxed italic">"{ticket.motivo}"</p>
+                    </div>
+                  )}
+                </div>
+              </article>
+            ))}
+            {filteredTickets.length > ticketsLimit && (
+              <div className="mt-6 mb-8 flex justify-center col-span-full">
+                 <button onClick={() => setTicketsLimit(l => l + 15)} className="rounded-full border border-[var(--color-ted-red)] px-8 py-2.5 text-sm font-semibold text-[var(--color-ted-red)] transition hover:bg-[var(--color-ted-red)] hover:text-white">Cargar más registros ({ticketsLimit} de {filteredTickets.length})</button>
+              </div>
+            )}
           </section>
         </div>
         )}
